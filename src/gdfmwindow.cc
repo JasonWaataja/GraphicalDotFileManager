@@ -22,6 +22,8 @@
 
 #include "gdfmwindow.h"
 
+#include "filefinder.h"
+
 namespace gdfm {
 
 GdfmWindow::GdfmWindow() : Gtk::ApplicationWindow()
