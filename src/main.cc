@@ -20,10 +20,29 @@
  * IN THE SOFTWARE.
  */
 
+
+#include <stdlib.h>
+
 #include <iostream>
+
+#include "gdfmwindow.h"
 
 int
 main(int argc, char* argv[])
 {
-    std::cout << "gdfm" << std::endl;
+    auto application =
+        Gtk::Application::create(argc, argv, "com.waataja.gdfm");
+    try {
+        auto builder = Gtk::Builder::create_from_resource(
+            "/com/waataja/gdfm/ui/mainwindow.glade");
+        gdfm::GdfmWindow* window = nullptr;
+        builder->get_widget_derived("main_window", window);
+        return application->run(*window);
+    } catch (const Glib::FileError e) {
+        std::cerr << e.what() << std::endl;
+    } catch (const Gio::ResourceError& e) {
+        std::cerr << e.what() << std::endl;
+    }
+
+    return EXIT_FAILURE;
 }

@@ -29,13 +29,29 @@ namespace gdfm {
 
 class GdfmWindow : public Gtk::ApplicationWindow {
 public:
-    GdfmWindow();
     GdfmWindow(
         BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder);
-    ~GdfmWindow();
+    virtual ~GdfmWindow();
 
 private:
-    Glib::RefPtr<Gtk::Builder&> builder;
+    Glib::RefPtr<Gtk::Builder> builder;
+
+    /* Widgets from the glade file. */
+    Gtk::Button* addModuleButton;
+    Gtk::TreeView* modulesView;
+
+    void initChildren();
+    void connectSignals();
+    void addActions();
+
+    /* Signal handlers. */
+    void onAddModuleButtonClicked();
+
+    /* Actions for use with bar. */
+    void onActionOpen();
+    void onActionSave();
+    void onActionSaveAs();
+    void onActionQuit();
 };
 } /* namespace gdfm */
 

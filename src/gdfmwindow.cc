@@ -22,17 +22,73 @@
 
 #include "gdfmwindow.h"
 
-#include "filefinder.h"
+#include <err.h>
+#include <stdlib.h>
+
+#include <iostream>
 
 namespace gdfm {
-
-GdfmWindow::GdfmWindow() : Gtk::ApplicationWindow()
-{
-}
 
 GdfmWindow::GdfmWindow(
     BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder)
     : Gtk::ApplicationWindow(cobject), builder(builder)
 {
+    initChildren();
+    connectSignals();
+    addActions();
+}
+
+GdfmWindow::~GdfmWindow()
+{
+}
+
+void
+GdfmWindow::initChildren()
+{
+    builder->get_widget("add_module_button", addModuleButton);
+    builder->get_widget("modules_view", modulesView);
+}
+
+void
+GdfmWindow::connectSignals()
+{
+    addModuleButton->signal_clicked().connect(
+        sigc::mem_fun(*this, &GdfmWindow::onAddModuleButtonClicked));
+}
+
+void
+GdfmWindow::addActions()
+{
+    this->add_action("open", sigc::mem_fun(*this, &GdfmWindow::onActionOpen));
+    this->add_action("save", sigc::mem_fun(*this, &GdfmWindow::onActionSave));
+    this->add_action(
+        "save-as", sigc::mem_fun(*this, &GdfmWindow::onActionSaveAs));
+    this->add_action("quit", sigc::mem_fun(*this, &GdfmWindow::onActionQuit));
+}
+
+void
+GdfmWindow::onAddModuleButtonClicked()
+{
+}
+
+void
+GdfmWindow::onActionOpen()
+{
+}
+
+void
+GdfmWindow::onActionSave()
+{
+}
+
+void
+GdfmWindow::onActionSaveAs()
+{
+}
+
+void
+GdfmWindow::onActionQuit()
+{
+    delete this;
 }
 } /* namespace gdfm */

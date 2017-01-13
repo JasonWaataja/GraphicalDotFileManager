@@ -12,12 +12,13 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/resources.c
 	COMMAND ${GLIB_COMPILE_RESOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/res/gdfm.gresource.xml --target=${CMAKE_CURRENT_BINARY_DIR}/resources.c --sourcedir=${CMAKE_CURRENT_SOURCE_DIR}/res --generate-source
 	)
 
-set_source_files_properties (${CMAKE_CURRENT_BINARY_DIR}/resources.c
-	PROPERTIES GENERATED TRUE)
+# set_source_files_properties (${CMAKE_CURRENT_BINARY_DIR}/resources.c
+# PROPERTIES GENERATED TRUE)
 
 
 set (SOURCES
 	main.cc
+	gdfmwindow.cc
 	${CMAKE_CURRENT_BINARY_DIR}/resources.c)
 
 check_include_files (wordexp.h HAVE_WORDEXP_H)
