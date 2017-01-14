@@ -89,6 +89,6 @@ GdfmWindow::onActionSaveAs()
 void
 GdfmWindow::onActionQuit()
 {
-    delete this;
+    close();
 }
 } /* namespace gdfm */
