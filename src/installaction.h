@@ -49,6 +49,8 @@ public:
     const std::string& getInstallFilename() const;
     void setInstallFilename(const std::string& installFilename);
 
+    void updateName() override;
+
 private:
     std::string filename;
     std::string sourceDirectory;

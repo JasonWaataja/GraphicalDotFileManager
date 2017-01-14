@@ -21,6 +21,8 @@ public:
         const std::string& filename, const std::string& directory);
     bool performAction() override;
 
+    void updateName() override;
+
 private:
     std::string filePath;
 };

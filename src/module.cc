@@ -106,4 +106,22 @@ Module::addUpdateAction(std::shared_ptr<ModuleAction> action)
 {
     updateActions.push_back(action);
 }
+
+const std::vector<std::shared_ptr<ModuleAction>>&
+Module::getInstallActions() const
+{
+    return installActions;
+}
+
+const std::vector<std::shared_ptr<ModuleAction>>&
+Module::getUninstallActions() const
+{
+    return uninstallActions;
+}
+
+const std::vector<std::shared_ptr<ModuleAction>>&
+Module::getUpdateActions() const
+{
+    return updateActions;
+}
 } /* namespace gdfm */

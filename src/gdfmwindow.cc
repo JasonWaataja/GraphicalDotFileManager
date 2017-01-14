@@ -25,10 +25,11 @@
 #include <err.h>
 #include <stdlib.h>
 
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 
 #include "configfilereader.h"
+#include "util.h"
 
 namespace gdfm {
 
@@ -76,10 +77,10 @@ GdfmWindow::addActions()
 void
 GdfmWindow::initModulesView()
 {
-    /* modulesStore = Gtk::TreeStore::create(columns); */
-    /* modulesView->set_model(modulesStore); */
-    /* modulesView->append_column("Module", columns.moduleColumn); */
-    /* modulesView->append_column("Actions", columns.actionColumn); */
+    modulesStore = Gtk::TreeStore::create(columns);
+    modulesView->set_model(modulesStore);
+    modulesView->append_column("Module", columns.moduleNameColumn);
+    modulesView->append_column("Actions", columns.actionNameColumn);
 }
 
 bool
@@ -88,17 +89,81 @@ GdfmWindow::loadFile(const std::string& path)
     ConfigFileReader reader(path);
     bool success = reader.readModules(std::back_inserter(modules));
     if (!success) {
-        Gtk::MessageDialog dialog(*this, "Info", false, Gtk::MESSAGE_ERROR,
-            Gtk::BUTTONS_OK, true);
+        Gtk::MessageDialog dialog(*this, "Failed to read modules.", false,
+            Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
         dialog.run();
         return false;
     }
     currentFilePath = path;
+    setModulesViewFromModules();
+    return true;
 }
 
 bool
 GdfmWindow::loadDirectory(const std::string& path)
 {
+}
+
+void
+GdfmWindow::setModulesViewFromModules()
+{
+    for (const auto& module : modules) {
+        appendModule(module);
+    }
+}
+
+void
+GdfmWindow::appendModule(const Module& module)
+{
+    Gtk::TreeModel::iterator topIter = modulesStore->append();
+    Gtk::TreeModel::Row topRow = *topIter;
+    topRow[columns.moduleNameColumn] = module.getName();
+    topRow[columns.moduleColumn] = std::shared_ptr<Module>(new Module(module));
+    const std::vector<std::shared_ptr<ModuleAction>> installActions =
+        module.getInstallActions();
+    if (installActions.size() > 0) {
+        Gtk::TreeModel::iterator typeIter =
+            modulesStore->append(topRow.children());
+        Gtk::TreeModel::Row typeRow = *typeIter;
+        typeRow[columns.moduleNameColumn] = "Install";
+        for (const auto& action : installActions) {
+            Gtk::TreeModel::iterator actionIter =
+                modulesStore->append(typeRow.children());
+            Gtk::TreeModel::Row actionRow = *actionIter;
+            actionRow[columns.actionNameColumn] = action->getName();
+            actionRow[columns.actionColumn] = action;
+        }
+    }
+    const std::vector<std::shared_ptr<ModuleAction>> uninstallActions =
+        module.getUninstallActions();
+    if (uninstallActions.size() > 0) {
+        Gtk::TreeModel::iterator typeIter =
+            modulesStore->append(topRow.children());
+        Gtk::TreeModel::Row typeRow = *typeIter;
+        typeRow[columns.moduleNameColumn] = "Uninstall";
+        for (const auto& action : uninstallActions) {
+            Gtk::TreeModel::iterator actionIter =
+                modulesStore->append(typeRow.children());
+            Gtk::TreeModel::Row actionRow = *actionIter;
+            actionRow[columns.actionNameColumn] = action->getName();
+            actionRow[columns.actionColumn] = action;
+        }
+    }
+    const std::vector<std::shared_ptr<ModuleAction>> updateActions =
+        module.getUpdateActions();
+    if (updateActions.size() > 0) {
+        Gtk::TreeModel::iterator typeIter =
+            modulesStore->append(topRow.children());
+        Gtk::TreeModel::Row typeRow = *typeIter;
+        typeRow[columns.moduleNameColumn] = "Update";
+        for (const auto& action : updateActions) {
+            Gtk::TreeModel::iterator actionIter =
+                modulesStore->append(typeRow.children());
+            Gtk::TreeModel::Row actionRow = *actionIter;
+            actionRow[columns.actionNameColumn] = action->getName();
+            actionRow[columns.actionColumn] = action;
+        }
+    }
 }
 
 void
@@ -117,6 +182,8 @@ GdfmWindow::onActionOpenFile()
     dialog.add_button("Select", Gtk::RESPONSE_OK);
     dialog.add_button("Cancel", Gtk::RESPONSE_CANCEL);
 
+    dialog.set_current_folder(getHomeDirectory());
+
     int response = dialog.run();
     if (response == Gtk::RESPONSE_OK)
         loadFile(dialog.get_filename());
@@ -132,6 +199,8 @@ GdfmWindow::onActionOpenDirectory()
 
     dialog.add_button("Select", Gtk::RESPONSE_OK);
     dialog.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+
+    dialog.set_current_folder(getHomeDirectory());
 
     int response = dialog.run();
     if (response == Gtk::RESPONSE_OK)

@@ -90,4 +90,10 @@ ModuleAction::vVerboseMessage(const char* format, va_list argumentList)
 
     vprintf(format, argumentList);
 }
+
+void
+ModuleAction::updateName()
+{
+    name = DEFAULT_ACTION_NAME;
+}
 } /* namespace gdfm */

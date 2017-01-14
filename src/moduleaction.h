@@ -47,6 +47,8 @@ public:
     bool isInteractive() const;
     void setInteractive(bool interactive);
 
+    virtual void updateName();
+
 private:
     std::string name;
     bool verbose = false;

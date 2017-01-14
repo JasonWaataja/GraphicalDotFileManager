@@ -72,4 +72,10 @@ ShellAction::addCommand(const std::string& command)
 {
     shellCommands.push_back(command);
 }
+
+void
+ShellAction::updateName()
+{
+    setName("shell command");
+}
 } /* namespace gdfm */

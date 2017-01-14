@@ -43,6 +43,11 @@ public:
     bool install() const;
     bool uninstall() const;
     bool update() const;
+    const std::vector<std::shared_ptr<ModuleAction>>&
+    getInstallActions() const;
+    const std::vector<std::shared_ptr<ModuleAction>>&
+    getUninstallActions() const;
+    const std::vector<std::shared_ptr<ModuleAction>>& getUpdateActions() const;
     const std::string& getName() const;
     void setName(const std::string& name);
 

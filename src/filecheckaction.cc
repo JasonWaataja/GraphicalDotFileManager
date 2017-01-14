@@ -46,6 +46,7 @@ FileCheckAction::FileCheckAction(
     const std::string& sourcePath, const std::string& destinationPath)
     : sourcePath(sourcePath), destinationPath(destinationPath)
 {
+    updateName();
 }
 
 const std::string&
@@ -58,6 +59,7 @@ void
 FileCheckAction::setSourcePath(const std::string& sourcePath)
 {
     this->sourcePath = sourcePath;
+    updateName();
 }
 
 const std::string&
@@ -77,6 +79,7 @@ FileCheckAction::setFiles(
     const std::string& sourcePath, const std::string& destinationPath)
 {
     setSourcePath(sourcePath);
+    updateName();
     setDestinationPath(destinationPath);
 }
 
@@ -283,5 +286,14 @@ FileCheckAction::performAction()
     action.setVerbose(isVerbose());
     action.setInteractive(isInteractive());
     return action.performAction();
+}
+
+void
+FileCheckAction::updateName()
+{
+    char* sourceCopy = strdup(sourcePath.c_str());
+    char* name = basename(sourceCopy);
+    setName(name);
+    free(sourceCopy);
 }
 } /* namespace gdfm */

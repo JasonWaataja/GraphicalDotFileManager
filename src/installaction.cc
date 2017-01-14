@@ -75,6 +75,7 @@ void
 InstallAction::setFilename(const std::string& filename)
 {
     this->filename = filename;
+    updateName();
 }
 
 const std::string&
@@ -140,5 +141,11 @@ InstallAction::performAction()
             destinationDirectory.c_str());
     }
     return copyFile(sourcePath, destinationPath);
+}
+
+void
+InstallAction::updateName()
+{
+    setName(filename);
 }
 } /* namespace gdfm */

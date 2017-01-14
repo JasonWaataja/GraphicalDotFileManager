@@ -54,6 +54,8 @@ public:
     std::string getDependenciesAsString() const;
     std::string getDependenciesAsString(const std::string& delimiter) const;
 
+    void updateName() override;
+
 private:
     std::vector<std::string> dependencies;
 };

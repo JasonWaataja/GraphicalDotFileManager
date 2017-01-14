@@ -26,13 +26,9 @@ namespace gdfm {
 
 GdfmModelColumnRecord::GdfmModelColumnRecord()
 {
+    add(moduleNameColumn);
+    add(actionNameColumn);
     add(moduleColumn);
     add(actionColumn);
-}
-
-int
-GdfmModelColumnRecord::getColumnCount() const
-{
-    return 2;
 }
 } /* namespace gdfm */

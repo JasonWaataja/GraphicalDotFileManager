@@ -28,6 +28,7 @@ namespace gdfm {
 
 MessageAction::MessageAction(const std::string& message) : message(message)
 {
+    updateName();
 }
 
 bool
@@ -47,5 +48,11 @@ void
 MessageAction::setMessage(const std::string& message)
 {
     this->message = message;
+}
+
+void
+MessageAction::updateName()
+{
+    setName("Message");
 }
 } /* namespace gdfm */

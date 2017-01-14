@@ -26,15 +26,18 @@
 
 #include <gtkmm.h>
 
+#include "module.h"
+#include "moduleaction.h"
+
 namespace gdfm {
 
 class GdfmModelColumnRecord : public Gtk::TreeModelColumnRecord {
 public:
     GdfmModelColumnRecord();
-    Gtk::TreeModelColumn<Glib::ustring> moduleColumn;
-    Gtk::TreeModelColumn<Glib::ustring> actionColumn;
-
-    int getColumnCount() const;
+    Gtk::TreeModelColumn<Glib::ustring> moduleNameColumn;
+    Gtk::TreeModelColumn<Glib::ustring> actionNameColumn;
+    Gtk::TreeModelColumn<std::shared_ptr<Module>> moduleColumn;
+    Gtk::TreeModelColumn<std::shared_ptr<ModuleAction>> actionColumn;
 };
 } /* namespace 2017 */
 

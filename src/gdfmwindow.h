@@ -56,6 +56,8 @@ public:
      */
     bool loadDirectory(const std::string& directoryPath);
 
+    void setModulesViewFromModules();
+
     const std::string& getCurrentFilePath() const;
 
 private:
@@ -107,6 +109,8 @@ private:
     void onActionSave();
     void onActionSaveAs();
     void onActionQuit();
+
+    void appendModule(const Module& module);
 };
 } /* namespace gdfm */
 

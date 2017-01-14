@@ -42,6 +42,8 @@ public:
     bool performAction() override;
     void addCommand(const std::string& command);
 
+    void updateName() override;
+
 private:
     std::vector<std::string> shellCommands;
 };

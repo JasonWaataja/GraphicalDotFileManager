@@ -36,6 +36,8 @@ public:
     const std::string& getMessage() const;
     void setMessage(const std::string& message);
 
+    void updateName() override;
+
 private:
     std::string message;
 };
