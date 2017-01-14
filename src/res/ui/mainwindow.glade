@@ -27,12 +27,20 @@
                     <property name="can_focus">False</property>
                     <child>
                       <object class="GtkImageMenuItem">
-                        <property name="label">gtk-open</property>
+                        <property name="label">Open File</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="action_name">win.open</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
+                        <property name="action_name">win.open-file</property>
+                        <property name="use_stock">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem">
+                        <property name="label">Open Directory</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="action_name">win.open-directory</property>
+                        <property name="use_stock">False</property>
                       </object>
                     </child>
                     <child>

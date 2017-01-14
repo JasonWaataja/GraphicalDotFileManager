@@ -19,6 +19,20 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/resources.c
 set (SOURCES
 	main.cc
 	gdfmwindow.cc
+	command.cc
+	configfilereader.cc
+	dependencyaction.cc
+	filecheckaction.cc
+	installaction.cc
+	messageaction.cc
+	moduleaction.cc
+	module.cc
+	options.cc
+	readerenvironment.cc
+	removeaction.cc
+	shellaction.cc
+	gdfmmodelcolumnrecord.cc
+	util.cc
 	${CMAKE_CURRENT_BINARY_DIR}/resources.c)
 
 check_include_files (wordexp.h HAVE_WORDEXP_H)

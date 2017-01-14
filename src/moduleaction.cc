@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Jason Waataja
+ * Copyright (c) 2016 Jason Waataja
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,33 +20,74 @@
  * IN THE SOFTWARE.
  */
 
+#include "moduleaction.h"
 
-#include <stdlib.h>
+#include <stdio.h>
 
-#include <iostream>
+namespace gdfm {
 
-#include "gdfmwindow.h"
-
-int
-main(int argc, char* argv[])
+ModuleAction::ModuleAction() : name(DEFAULT_ACTION_NAME)
 {
-    auto application =
-        Gtk::Application::create(argc, argv, "com.waataja.gdfm");
-    try {
-        auto builder = Gtk::Builder::create_from_resource(
-            "/com/waataja/gdfm/ui/mainwindow.glade");
-        gdfm::GdfmWindow* window = nullptr;
-        builder->get_widget_derived("main_window", window);
-        int status = application->run(*window);
-        delete window;
-        return status;
-    } catch (const Glib::FileError e) {
-        std::cerr << e.what() << std::endl;
-    } catch (const Gio::ResourceError& e) {
-        std::cerr << e.what() << std::endl;
-    } catch (const Gtk::BuilderError& e) {
-        std::cerr << e.what() << std::endl;
-    }
-
-    return EXIT_FAILURE;
 }
+
+ModuleAction::ModuleAction(const std::string& name) : name(name)
+{
+}
+
+const std::string&
+ModuleAction::getName() const
+{
+    return name;
+}
+
+void
+ModuleAction::setName(const std::string& name)
+{
+    this->name = name;
+}
+
+bool
+ModuleAction::isVerbose() const
+{
+    return verbose;
+}
+
+void
+ModuleAction::setVerbose(bool verbose)
+{
+    this->verbose = verbose;
+}
+
+bool
+ModuleAction::isInteractive() const
+{
+    return interactive;
+}
+
+void
+ModuleAction::setInteractive(bool interactive)
+{
+    this->interactive = interactive;
+}
+
+void
+ModuleAction::verboseMessage(const char* format, ...)
+{
+    if (!verbose)
+        return;
+
+    va_list argumentList;
+    va_start(argumentList, format);
+    vVerboseMessage(format, argumentList);
+    va_end(argumentList);
+}
+
+void
+ModuleAction::vVerboseMessage(const char* format, va_list argumentList)
+{
+    if (!verbose)
+        return;
+
+    vprintf(format, argumentList);
+}
+} /* namespace gdfm */

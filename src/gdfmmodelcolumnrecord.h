@@ -21,32 +21,21 @@
  */
 
 
-#include <stdlib.h>
+#ifndef GDFM_MODEL_COLUMN_RECORD_H
+#define GDFM_MODEL_COLUMN_RECORD_H
 
-#include <iostream>
+#include <gtkmm.h>
 
-#include "gdfmwindow.h"
+namespace gdfm {
 
-int
-main(int argc, char* argv[])
-{
-    auto application =
-        Gtk::Application::create(argc, argv, "com.waataja.gdfm");
-    try {
-        auto builder = Gtk::Builder::create_from_resource(
-            "/com/waataja/gdfm/ui/mainwindow.glade");
-        gdfm::GdfmWindow* window = nullptr;
-        builder->get_widget_derived("main_window", window);
-        int status = application->run(*window);
-        delete window;
-        return status;
-    } catch (const Glib::FileError e) {
-        std::cerr << e.what() << std::endl;
-    } catch (const Gio::ResourceError& e) {
-        std::cerr << e.what() << std::endl;
-    } catch (const Gtk::BuilderError& e) {
-        std::cerr << e.what() << std::endl;
-    }
+class GdfmModelColumnRecord : public Gtk::TreeModelColumnRecord {
+public:
+    GdfmModelColumnRecord();
+    Gtk::TreeModelColumn<Glib::ustring> moduleColumn;
+    Gtk::TreeModelColumn<Glib::ustring> actionColumn;
 
-    return EXIT_FAILURE;
-}
+    int getColumnCount() const;
+};
+} /* namespace 2017 */
+
+#endif /* GDFM_MODEL_COLUMN_RECORD_H */

@@ -23,7 +23,13 @@
 #ifndef GDFMWINDOW_H
 #define GDFMWINDOW_H
 
+#include <string>
+#include <vector>
+
 #include <gtkmm.h>
+
+#include "gdfmmodelcolumnrecord.h"
+#include "module.h"
 
 namespace gdfm {
 
@@ -33,22 +39,71 @@ public:
         BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder);
     virtual ~GdfmWindow();
 
+    /*
+     * Reads the modules in the file given by path. Sets the current file to
+     * the given config file.
+     *
+     * Returns if the modules was successfully loaded and the window is
+     * currently editing it.
+     */
+    bool loadFile(const std::string& filePath);
+    /*
+     * Reads the modules in the file named config.dfm in the given directory
+     * and sets the current file to that file.
+     *
+     * Returns if the modules were successfully loaded and the window is
+     * currently editing it.
+     */
+    bool loadDirectory(const std::string& directoryPath);
+
+    const std::string& getCurrentFilePath() const;
+
 private:
+    std::string currentFilePath;
+    std::vector<gdfm::Module> modules;
+
     Glib::RefPtr<Gtk::Builder> builder;
 
     /* Widgets from the glade file. */
     Gtk::Button* addModuleButton;
     Gtk::TreeView* modulesView;
 
+    GdfmModelColumnRecord columns;
+    Glib::RefPtr<Gtk::TreeStore> modulesStore;
+
+    /*
+     * This method must be called before accessing any of the widgets specified
+     * in the builder file. It assigns the pointers for the member widgets of
+     * this class to the pointers in the builder. This does not initialize
+     * members that are not in the builder file, specifically the modules
+     * store.
+     */
     void initChildren();
+    /*
+     * Connects the signals for the widgets to their correct signal handlers.
+     * It is recommended to call this before doing substantial work on this
+     * class.
+     */
     void connectSignals();
+    /*
+     * Adds the correct actions with the correct names to the window's list of
+     * actions. This is so that the actions specified in the builder file for
+     * the menu items activate the correct actions.
+     */
     void addActions();
+
+    /*
+     * Initializes the tree view for the modules. This includes initializing
+     * modulesStore.
+     */
+    void initModulesView();
 
     /* Signal handlers. */
     void onAddModuleButtonClicked();
 
     /* Actions for use with bar. */
-    void onActionOpen();
+    void onActionOpenFile();
+    void onActionOpenDirectory();
     void onActionSave();
     void onActionSaveAs();
     void onActionQuit();

@@ -37,7 +37,7 @@
 
 #include <fstream>
 
-namespace dfm {
+namespace gdfm {
 
 bool
 getYesOrNo()
@@ -354,4 +354,4 @@ returnOne(const struct dirent* entry)
 {
     return 1;
 }
-} /* namespace dfm */
+} /* namespace gdfm */

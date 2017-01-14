@@ -26,6 +26,9 @@
 #include <stdlib.h>
 
 #include <iostream>
+#include <algorithm>
+
+#include "configfilereader.h"
 
 namespace gdfm {
 
@@ -36,6 +39,7 @@ GdfmWindow::GdfmWindow(
     initChildren();
     connectSignals();
     addActions();
+    initModulesView();
 }
 
 GdfmWindow::~GdfmWindow()
@@ -59,11 +63,42 @@ GdfmWindow::connectSignals()
 void
 GdfmWindow::addActions()
 {
-    this->add_action("open", sigc::mem_fun(*this, &GdfmWindow::onActionOpen));
+    this->add_action(
+        "open-file", sigc::mem_fun(*this, &GdfmWindow::onActionOpenFile));
+    this->add_action("open-directory",
+        sigc::mem_fun(*this, &GdfmWindow::onActionOpenDirectory));
     this->add_action("save", sigc::mem_fun(*this, &GdfmWindow::onActionSave));
     this->add_action(
         "save-as", sigc::mem_fun(*this, &GdfmWindow::onActionSaveAs));
     this->add_action("quit", sigc::mem_fun(*this, &GdfmWindow::onActionQuit));
+}
+
+void
+GdfmWindow::initModulesView()
+{
+    /* modulesStore = Gtk::TreeStore::create(columns); */
+    /* modulesView->set_model(modulesStore); */
+    /* modulesView->append_column("Module", columns.moduleColumn); */
+    /* modulesView->append_column("Actions", columns.actionColumn); */
+}
+
+bool
+GdfmWindow::loadFile(const std::string& path)
+{
+    ConfigFileReader reader(path);
+    bool success = reader.readModules(std::back_inserter(modules));
+    if (!success) {
+        Gtk::MessageDialog dialog(*this, "Info", false, Gtk::MESSAGE_ERROR,
+            Gtk::BUTTONS_OK, true);
+        dialog.run();
+        return false;
+    }
+    currentFilePath = path;
+}
+
+bool
+GdfmWindow::loadDirectory(const std::string& path)
+{
 }
 
 void
@@ -72,8 +107,35 @@ GdfmWindow::onAddModuleButtonClicked()
 }
 
 void
-GdfmWindow::onActionOpen()
+GdfmWindow::onActionOpenFile()
 {
+    Gtk::FileChooserDialog dialog(
+        *this, "Choose a File", Gtk::FILE_CHOOSER_ACTION_OPEN);
+    dialog.set_modal(true);
+    dialog.set_select_multiple(false);
+
+    dialog.add_button("Select", Gtk::RESPONSE_OK);
+    dialog.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+
+    int response = dialog.run();
+    if (response == Gtk::RESPONSE_OK)
+        loadFile(dialog.get_filename());
+}
+
+void
+GdfmWindow::onActionOpenDirectory()
+{
+    Gtk::FileChooserDialog dialog(
+        *this, "Select Folder", Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
+    dialog.set_modal(true);
+    dialog.set_select_multiple(false);
+
+    dialog.add_button("Select", Gtk::RESPONSE_OK);
+    dialog.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+
+    int response = dialog.run();
+    if (response == Gtk::RESPONSE_OK)
+        loadDirectory(dialog.get_filename());
 }
 
 void

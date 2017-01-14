@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Jason Waataja
+ * Copyright (c) 2016 Jason Waataja
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,33 +20,38 @@
  * IN THE SOFTWARE.
  */
 
+#ifndef MODULE_ACTION_H
+#define MODULE_ACTION_H
 
-#include <stdlib.h>
+#include <stdarg.h>
 
-#include <iostream>
+#include <string>
 
-#include "gdfmwindow.h"
+namespace gdfm {
 
-int
-main(int argc, char* argv[])
-{
-    auto application =
-        Gtk::Application::create(argc, argv, "com.waataja.gdfm");
-    try {
-        auto builder = Gtk::Builder::create_from_resource(
-            "/com/waataja/gdfm/ui/mainwindow.glade");
-        gdfm::GdfmWindow* window = nullptr;
-        builder->get_widget_derived("main_window", window);
-        int status = application->run(*window);
-        delete window;
-        return status;
-    } catch (const Glib::FileError e) {
-        std::cerr << e.what() << std::endl;
-    } catch (const Gio::ResourceError& e) {
-        std::cerr << e.what() << std::endl;
-    } catch (const Gtk::BuilderError& e) {
-        std::cerr << e.what() << std::endl;
-    }
+const char DEFAULT_ACTION_NAME[] = "generic action";
 
-    return EXIT_FAILURE;
-}
+class ModuleAction {
+public:
+    ModuleAction();
+    ModuleAction(const std::string& name);
+    virtual bool performAction() = 0;
+
+    void verboseMessage(const char* format, ...);
+    void vVerboseMessage(const char* format, va_list argumentList);
+
+    const std::string& getName() const;
+    void setName(const std::string& name);
+    bool isVerbose() const;
+    void setVerbose(bool verbose);
+    bool isInteractive() const;
+    void setInteractive(bool interactive);
+
+private:
+    std::string name;
+    bool verbose = false;
+    bool interactive = false;
+};
+} /* namespace gdfm */
+
+#endif /* MODULE_ACTION_H */

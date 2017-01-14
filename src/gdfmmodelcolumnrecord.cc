@@ -20,33 +20,19 @@
  * IN THE SOFTWARE.
  */
 
+#include "gdfmmodelcolumnrecord.h"
 
-#include <stdlib.h>
+namespace gdfm {
 
-#include <iostream>
-
-#include "gdfmwindow.h"
+GdfmModelColumnRecord::GdfmModelColumnRecord()
+{
+    add(moduleColumn);
+    add(actionColumn);
+}
 
 int
-main(int argc, char* argv[])
+GdfmModelColumnRecord::getColumnCount() const
 {
-    auto application =
-        Gtk::Application::create(argc, argv, "com.waataja.gdfm");
-    try {
-        auto builder = Gtk::Builder::create_from_resource(
-            "/com/waataja/gdfm/ui/mainwindow.glade");
-        gdfm::GdfmWindow* window = nullptr;
-        builder->get_widget_derived("main_window", window);
-        int status = application->run(*window);
-        delete window;
-        return status;
-    } catch (const Glib::FileError e) {
-        std::cerr << e.what() << std::endl;
-    } catch (const Gio::ResourceError& e) {
-        std::cerr << e.what() << std::endl;
-    } catch (const Gtk::BuilderError& e) {
-        std::cerr << e.what() << std::endl;
-    }
-
-    return EXIT_FAILURE;
+    return 2;
 }
+} /* namespace gdfm */

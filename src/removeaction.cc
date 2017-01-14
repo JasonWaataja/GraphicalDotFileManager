@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Jason Waataja
+ * Copyright (c) 2016 Jason Waataja
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,33 +20,57 @@
  * IN THE SOFTWARE.
  */
 
+#include "removeaction.h"
 
-#include <stdlib.h>
+#include <err.h>
 
 #include <iostream>
 
-#include "gdfmwindow.h"
+#include "util.h"
 
-int
-main(int argc, char* argv[])
+namespace gdfm {
+
+RemoveAction::RemoveAction(const std::string& filePath)
+    : ModuleAction(DEFAULT_REMOVE_ACTION_NAME), filePath(filePath)
 {
-    auto application =
-        Gtk::Application::create(argc, argv, "com.waataja.gdfm");
-    try {
-        auto builder = Gtk::Builder::create_from_resource(
-            "/com/waataja/gdfm/ui/mainwindow.glade");
-        gdfm::GdfmWindow* window = nullptr;
-        builder->get_widget_derived("main_window", window);
-        int status = application->run(*window);
-        delete window;
-        return status;
-    } catch (const Glib::FileError e) {
-        std::cerr << e.what() << std::endl;
-    } catch (const Gio::ResourceError& e) {
-        std::cerr << e.what() << std::endl;
-    } catch (const Gtk::BuilderError& e) {
-        std::cerr << e.what() << std::endl;
-    }
-
-    return EXIT_FAILURE;
 }
+
+RemoveAction::RemoveAction(
+    const std::string& filename, const std::string& directory)
+    : ModuleAction(DEFAULT_REMOVE_ACTION_NAME),
+      filePath(directory + "/" + filename)
+{
+}
+
+const std::string&
+RemoveAction::getFilePath() const
+{
+    return filePath;
+}
+
+void
+RemoveAction::setFilePath(const std::string& filePath)
+{
+    this->filePath = filePath;
+}
+
+void
+RemoveAction::setFilePath(
+    const std::string& filename, const std::string& directory)
+{
+    filePath = directory + "/" + filename;
+}
+
+bool
+RemoveAction::performAction()
+{
+    if (isInteractive()) {
+        std::string prompt = "Remove " + filePath + "?";
+        if (!getYesOrNo(prompt))
+            return true;
+        std::cout << std::endl;
+    }
+    verboseMessage("Removing %s.\n\n", filePath.c_str());
+    return deleteFile(filePath);
+}
+} /* namespace gdfm */

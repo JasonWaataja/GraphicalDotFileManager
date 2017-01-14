@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Jason Waataja
+ * Copyright (c) 2016 Jason Waataja
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,33 +20,38 @@
  * IN THE SOFTWARE.
  */
 
+#ifndef MODULE_H
+#define MODULE_H
 
-#include <stdlib.h>
+#include <memory>
+#include <string>
+#include <vector>
 
-#include <iostream>
+#include "moduleaction.h"
 
-#include "gdfmwindow.h"
+namespace gdfm {
 
-int
-main(int argc, char* argv[])
-{
-    auto application =
-        Gtk::Application::create(argc, argv, "com.waataja.gdfm");
-    try {
-        auto builder = Gtk::Builder::create_from_resource(
-            "/com/waataja/gdfm/ui/mainwindow.glade");
-        gdfm::GdfmWindow* window = nullptr;
-        builder->get_widget_derived("main_window", window);
-        int status = application->run(*window);
-        delete window;
-        return status;
-    } catch (const Glib::FileError e) {
-        std::cerr << e.what() << std::endl;
-    } catch (const Gio::ResourceError& e) {
-        std::cerr << e.what() << std::endl;
-    } catch (const Gtk::BuilderError& e) {
-        std::cerr << e.what() << std::endl;
-    }
+const char DEFAULT_MODULE_NAMES[] = "Generic Module";
 
-    return EXIT_FAILURE;
-}
+class Module {
+public:
+    Module();
+    Module(const std::string& name);
+    void addInstallAction(std::shared_ptr<ModuleAction> action);
+    void addUninstallAction(std::shared_ptr<ModuleAction> action);
+    void addUpdateAction(std::shared_ptr<ModuleAction> action);
+    bool install() const;
+    bool uninstall() const;
+    bool update() const;
+    const std::string& getName() const;
+    void setName(const std::string& name);
+
+private:
+    std::string name;
+    std::vector<std::shared_ptr<ModuleAction>> installActions;
+    std::vector<std::shared_ptr<ModuleAction>> uninstallActions;
+    std::vector<std::shared_ptr<ModuleAction>> updateActions;
+};
+} /* namespace gdfm */
+
+#endif /* MODULE_H */

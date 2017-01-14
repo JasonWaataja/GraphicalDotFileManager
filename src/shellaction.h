@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Jason Waataja
+ * Copyright (c) 2016 Jason Waataja
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,33 +20,31 @@
  * IN THE SOFTWARE.
  */
 
+#ifndef SHELL_ACTION_H
+#define SHELL_ACTION_H
 
-#include <stdlib.h>
+#include <string>
+#include <vector>
 
-#include <iostream>
+#include "moduleaction.h"
 
-#include "gdfmwindow.h"
+namespace gdfm {
 
-int
-main(int argc, char* argv[])
-{
-    auto application =
-        Gtk::Application::create(argc, argv, "com.waataja.gdfm");
-    try {
-        auto builder = Gtk::Builder::create_from_resource(
-            "/com/waataja/gdfm/ui/mainwindow.glade");
-        gdfm::GdfmWindow* window = nullptr;
-        builder->get_widget_derived("main_window", window);
-        int status = application->run(*window);
-        delete window;
-        return status;
-    } catch (const Glib::FileError e) {
-        std::cerr << e.what() << std::endl;
-    } catch (const Gio::ResourceError& e) {
-        std::cerr << e.what() << std::endl;
-    } catch (const Gtk::BuilderError& e) {
-        std::cerr << e.what() << std::endl;
-    }
+const char SHELL_PROCESS[] = "/usr/bin/env bash";
+const char DEFAULT_SHELL_ACTION_NAME[] = "shell command";
 
-    return EXIT_FAILURE;
-}
+class ShellAction : public ModuleAction {
+public:
+    ShellAction();
+    ShellAction(const std::string& name);
+    const std::vector<std::string>& getShellCommands() const;
+
+    bool performAction() override;
+    void addCommand(const std::string& command);
+
+private:
+    std::vector<std::string> shellCommands;
+};
+} /* namespace gdfm */
+
+#endif /* SHELL_ACTION_H */

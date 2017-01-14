@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Jason Waataja
+ * Copyright (c) 2016 Jason Waataja
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,33 +20,25 @@
  * IN THE SOFTWARE.
  */
 
+#ifndef MESSAGE_ACTION_H
+#define MESSAGE_ACTION_H
 
-#include <stdlib.h>
+#include <string>
 
-#include <iostream>
+#include "moduleaction.h"
 
-#include "gdfmwindow.h"
+namespace gdfm {
 
-int
-main(int argc, char* argv[])
-{
-    auto application =
-        Gtk::Application::create(argc, argv, "com.waataja.gdfm");
-    try {
-        auto builder = Gtk::Builder::create_from_resource(
-            "/com/waataja/gdfm/ui/mainwindow.glade");
-        gdfm::GdfmWindow* window = nullptr;
-        builder->get_widget_derived("main_window", window);
-        int status = application->run(*window);
-        delete window;
-        return status;
-    } catch (const Glib::FileError e) {
-        std::cerr << e.what() << std::endl;
-    } catch (const Gio::ResourceError& e) {
-        std::cerr << e.what() << std::endl;
-    } catch (const Gtk::BuilderError& e) {
-        std::cerr << e.what() << std::endl;
-    }
+class MessageAction : public ModuleAction {
+public:
+    MessageAction(const std::string& message);
+    bool performAction() override;
+    const std::string& getMessage() const;
+    void setMessage(const std::string& message);
 
-    return EXIT_FAILURE;
-}
+private:
+    std::string message;
+};
+} /* namespace gdfm */
+
+#endif /* MESSAGE_ACTION_H */

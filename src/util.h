@@ -29,7 +29,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-namespace dfm {
+namespace gdfm {
 
 /*
  * The maximum number of file descriptors for use with nftw. I have no idea
@@ -181,6 +181,6 @@ bool copyFile(
  * Returns one.
  */
 int returnOne(const struct dirent* entry);
-} /* namespace dfm */
+} /* namespace gdfm */
 
 #endif /* UTIL_H */
