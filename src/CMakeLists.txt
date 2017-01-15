@@ -33,6 +33,7 @@ set (SOURCES
 	shellaction.cc
 	gdfmmodelcolumnrecord.cc
 	util.cc
+	createmoduledialog.cc
 	${CMAKE_CURRENT_BINARY_DIR}/resources.c)
 
 check_include_files (wordexp.h HAVE_WORDEXP_H)

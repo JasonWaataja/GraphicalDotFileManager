@@ -2,5 +2,6 @@
 <gresources>
    <gresource prefix="/com/waataja/gdfm">
       <file preprocess="xml-stripblanks">ui/mainwindow.glade</file>
+	  <file preprocess="xml-stripblanks">ui/createmoduledialog.glade</file>
   </gresource>
 </gresources>

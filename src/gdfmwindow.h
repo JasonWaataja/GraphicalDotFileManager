@@ -23,6 +23,7 @@
 #ifndef GDFMWINDOW_H
 #define GDFMWINDOW_H
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -60,9 +61,19 @@ public:
 
     const std::string& getCurrentFilePath() const;
 
+    /*
+     * Creates a dialog to add a new module. If the user accepts, then a smart
+     * pointer with the module is returned.
+     *
+     * Returns a pointer to a new module if the module was created, a null
+     * pointer otherwise.
+     */
+    std::shared_ptr<Module> createModuleDialog();
+
 private:
     std::string currentFilePath;
     std::vector<gdfm::Module> modules;
+    Glib::RefPtr<Gtk::TreeSelection> modulesSelection;
 
     Glib::RefPtr<Gtk::Builder> builder;
 
@@ -102,6 +113,8 @@ private:
 
     /* Signal handlers. */
     void onAddModuleButtonClicked();
+    void onModulesViewRowActivated(
+        const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
 
     /* Actions for use with bar. */
     void onActionOpenFile();

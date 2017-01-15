@@ -22,6 +22,8 @@
 
 #include "gdfmwindow.h"
 
+#include <sys/stat.h>
+
 #include <err.h>
 #include <stdlib.h>
 
@@ -29,6 +31,7 @@
 #include <iostream>
 
 #include "configfilereader.h"
+#include "createmoduledialog.h"
 #include "util.h"
 
 namespace gdfm {
@@ -38,9 +41,9 @@ GdfmWindow::GdfmWindow(
     : Gtk::ApplicationWindow(cobject), builder(builder)
 {
     initChildren();
-    connectSignals();
     addActions();
     initModulesView();
+    connectSignals();
 }
 
 GdfmWindow::~GdfmWindow()
@@ -59,6 +62,8 @@ GdfmWindow::connectSignals()
 {
     addModuleButton->signal_clicked().connect(
         sigc::mem_fun(*this, &GdfmWindow::onAddModuleButtonClicked));
+    modulesView->signal_row_activated().connect(
+        sigc::mem_fun(*this, &GdfmWindow::onModulesViewRowActivated));
 }
 
 void
@@ -81,6 +86,9 @@ GdfmWindow::initModulesView()
     modulesView->set_model(modulesStore);
     modulesView->append_column("Module", columns.moduleNameColumn);
     modulesView->append_column("Actions", columns.actionNameColumn);
+
+    modulesSelection = modulesView->get_selection();
+    modulesSelection->set_mode(Gtk::SELECTION_SINGLE);
 }
 
 bool
@@ -102,6 +110,17 @@ GdfmWindow::loadFile(const std::string& path)
 bool
 GdfmWindow::loadDirectory(const std::string& path)
 {
+    std::string filePath = path + "/" + "config.dfm";
+    struct stat info;
+    if (stat(filePath.c_str(), &info) != 0) {
+        std::string message = "Failed to find config file " + path + ".";
+        Gtk::MessageDialog dialog(*this, message.c_str(), false,
+            Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
+        dialog.run();
+        return false;
+    }
+    loadFile(filePath);
+    return true;
 }
 
 void
@@ -169,6 +188,7 @@ GdfmWindow::appendModule(const Module& module)
 void
 GdfmWindow::onAddModuleButtonClicked()
 {
+    createModuleDialog();;
 }
 
 void
@@ -221,5 +241,22 @@ void
 GdfmWindow::onActionQuit()
 {
     close();
+}
+
+void
+GdfmWindow::onModulesViewRowActivated(
+    const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column)
+{
+    Gtk::MessageDialog dialog(*this, "Selection changed", false,
+        Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true);
+    dialog.run();
+}
+
+std::shared_ptr<Module>
+GdfmWindow::createModuleDialog()
+{
+    auto dialog = CreateModuleDialog::create();
+    dialog->run();
+    return std::shared_ptr<Module>();
 }
 } /* namespace gdfm */
