@@ -37,7 +37,7 @@ namespace gdfm {
 CreateModuleDialog::CreateModuleDialog(Gtk::Window& parent)
     : Gtk::Dialog("Create Module", parent, true)
 {
-    set_default_size(300, 300);
+    set_default_size(400, 300);
 
     contentBox = Gtk::manage(new Gtk::VBox());
     get_content_area()->add(*contentBox);
@@ -116,29 +116,12 @@ CreateModuleDialog::getModule()
         return std::shared_ptr<Module>();
     }
     std::shared_ptr<Module> module(new Module(name));
-    std::vector<Gtk::TreePath> paths = filesViewSelection->get_selected_rows();
-    for (const auto& path : paths) {
-        Gtk::TreeIter iter = filesList->get_iter(path);
-        Gtk::TreeRow row = *iter;
+    for (auto i = filesList->children().begin();
+         i != filesList->children().end(); i++) {
+        Gtk::TreeRow row = *i;
         Glib::ustring filename = row[filenameColumn];
-        /*
-         * TODO: Change the module class to have a list of filenames relative
-         * to its directory. This behavior below is not what I want right now,
-         * I want it to store a relative filename and then figure out the full
-         * path later. This actively finds it in the wrong directory.
-         */
-        std::string sourcePath = getCurrentDirectory() + "/" + filename;
-        std::string destinationPath =
-            getHomeDirectory() + "/" + row[destinationColumn];
-        std::shared_ptr<InstallAction> installAction(new InstallAction(
-            filename, getCurrentDirectory(), getHomeDirectory()));
-        std::shared_ptr<RemoveAction> uninstallAction(
-            new RemoveAction(destinationPath));
-        std::shared_ptr<FileCheckAction> updateAction(
-            new FileCheckAction(sourcePath, destinationPath));
-        module->addInstallAction(installAction);
-        module->addUninstallAction(uninstallAction);
-        module->addUpdateAction(updateAction);
+        Glib::ustring destinationDirectory = row[destinationColumn];
+        module->addFile(filename, destinationDirectory);
     }
     return module;
 }
@@ -155,15 +138,14 @@ CreateModuleDialog::onAddFileButtonClicked()
     }
     std::string destination = destinationEntry->get_text();
     if (destination.length() == 0) {
-        Gtk::MessageDialog dialog(*this, "You must enter a destination.",
-            false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true);
-        dialog.run();
-        return;
+        destination = "~";
     }
     Gtk::TreeIter iter = filesList->append();
     Gtk::TreeRow row = *iter;
     row[filenameColumn] = filename;
     row[destinationColumn] = destination;
+    filenameEntry->set_text("");
+    destinationEntry->set_text("");
 }
 
 void
@@ -189,11 +171,13 @@ CreateModuleDialog::onRemoveFileButtonClicked()
      */
     std::vector<Gtk::TreePath> selectedFiles =
         filesViewSelection->get_selected_rows();
+    if (selectedFiles.size() == 0)
+        return;
     std::vector<Gtk::TreeRowReference> rowReferences(selectedFiles.size());
     for (std::vector<Gtk::TreeModel::Path>::size_type i = 0;
-         i < selectedFiles.size(); i++) {
+         i < selectedFiles.size(); i++)
         rowReferences[i] = Gtk::TreeRowReference(filesList, selectedFiles[i]);
-    }
+
     for (const auto& reference : rowReferences) {
         Gtk::TreePath rowPath = reference.get_path();
         Gtk::TreeIter rowIter = filesList->get_iter(rowPath);

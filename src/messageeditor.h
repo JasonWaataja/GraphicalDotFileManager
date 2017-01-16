@@ -21,25 +21,28 @@
  */
 
 
-#ifndef GDFM_MODEL_COLUMN_RECORD_H
-#define GDFM_MODEL_COLUMN_RECORD_H
+#ifndef MESSAGE_EDITOR_H
+#define MESSAGE_EDITOR_H
+
+#include <memory>
 
 #include <gtkmm.h>
 
-#include "module.h"
-#include "moduleaction.h"
+#include "messageaction.h"
 
 namespace gdfm {
 
-class GdfmModelColumnRecord : public Gtk::TreeModelColumnRecord {
+class MessageEditor : public Gtk::Dialog {
 public:
-    GdfmModelColumnRecord();
-    Gtk::TreeModelColumn<Glib::ustring> moduleNameColumn;
-    Gtk::TreeModelColumn<Glib::ustring> actionNameColumn;
-    Gtk::TreeModelColumn<Glib::ustring> fileColumn;
-    Gtk::TreeModelColumn<std::shared_ptr<Module>> moduleColumn;
-    Gtk::TreeModelColumn<std::shared_ptr<ModuleAction>> actionColumn;
+    MessageEditor(Gtk::Window& parent, MessageAction* action);
+
+private:
+    MessageAction* action;
+    Gtk::Entry* nameEntry;
+    Gtk::Entry* messageEntry;
+
+    void onResponse(int responseId);
 };
 } /* namespace gdfm */
 
-#endif /* GDFM_MODEL_COLUMN_RECORD_H */
+#endif /* MESSAGE_EDITOR_H */

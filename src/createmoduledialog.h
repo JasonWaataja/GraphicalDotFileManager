@@ -64,6 +64,6 @@ private:
     void onFilesViewSelectionChanged();
     void onRemoveFileButtonClicked();
 };
-} /* namespace 2017 */
+} /* namespace gdfm */
 
 #endif /* CREATE_MODULE_DIALOG_H */

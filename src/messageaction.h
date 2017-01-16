@@ -37,6 +37,7 @@ public:
     void setMessage(const std::string& message);
 
     void updateName() override;
+    void graphicalEdit(Gtk::Window& parent) override;
 
 private:
     std::string message;

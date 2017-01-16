@@ -96,4 +96,9 @@ ModuleAction::updateName()
 {
     name = DEFAULT_ACTION_NAME;
 }
+
+void
+ModuleAction::graphicalEdit(Gtk::Window& parent)
+{
+}
 } /* namespace gdfm */

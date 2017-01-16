@@ -27,6 +27,8 @@
 
 #include <iostream>
 
+#include "shelleditor.h"
+
 namespace gdfm {
 
 ShellAction::ShellAction()
@@ -43,6 +45,12 @@ const std::vector<std::string>&
 ShellAction::getShellCommands() const
 {
     return shellCommands;
+}
+
+void
+ShellAction::setShellCommands(const std::vector<std::string>& shellCommands)
+{
+    this->shellCommands = shellCommands;
 }
 
 bool
@@ -77,5 +85,12 @@ void
 ShellAction::updateName()
 {
     setName("shell command");
+}
+
+void
+ShellAction::graphicalEdit(Gtk::Window& parent)
+{
+    ShellEditor editor(parent, this);
+    editor.run();
 }
 } /* namespace gdfm */

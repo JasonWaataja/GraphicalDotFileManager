@@ -24,6 +24,8 @@
 
 #include <iostream>
 
+#include "messageeditor.h"
+
 namespace gdfm {
 
 MessageAction::MessageAction(const std::string& message) : message(message)
@@ -54,5 +56,12 @@ void
 MessageAction::updateName()
 {
     setName("Message");
+}
+
+void
+MessageAction::graphicalEdit(Gtk::Window& parent)
+{
+    MessageEditor editor(parent, this);
+    editor.run();
 }
 } /* namespace gdfm */

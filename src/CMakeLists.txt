@@ -35,6 +35,8 @@ set (SOURCES
 	util.cc
 	createmoduledialog.cc
 	modulefile.cc
+	messageeditor.cc
+	shelleditor.cc
 	${CMAKE_CURRENT_BINARY_DIR}/resources.c)
 
 check_include_files (wordexp.h HAVE_WORDEXP_H)

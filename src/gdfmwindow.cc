@@ -261,9 +261,17 @@ void
 GdfmWindow::onModulesViewRowActivated(
     const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column)
 {
-    Gtk::MessageDialog dialog(*this, "Selection changed", false,
-        Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true);
-    dialog.run();
+    Gtk::TreeIter iter = modulesStore->get_iter(path);
+    Gtk::TreeRow row = *iter;
+    std::shared_ptr<ModuleAction> action = row[columns.actionColumn];
+    if (action) {
+        action->graphicalEdit(*this);
+        /*
+         * This is just in case the name is updated in the editor. If it's
+         * changed, this makes it show up on the view.
+         */
+        row[columns.actionNameColumn] = action->getName();
+    }
 }
 
 std::shared_ptr<Module>

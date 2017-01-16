@@ -27,6 +27,8 @@
 
 #include <string>
 
+#include <gtkmm.h>
+
 namespace gdfm {
 
 const char DEFAULT_ACTION_NAME[] = "generic action";
@@ -48,6 +50,13 @@ public:
     void setInteractive(bool interactive);
 
     virtual void updateName();
+    /*
+     * This method is a method to open a dialog to edit the given action. This
+     * is not meant to be in the DFM version of this file because it requires
+     * pulling in gtkmm which is not what I want for the command line version.
+     * This method should create a popup with several fields for editing.
+     */
+    virtual void graphicalEdit(Gtk::Window& parent);
 
 private:
     std::string name;

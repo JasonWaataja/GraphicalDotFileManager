@@ -38,11 +38,13 @@ public:
     ShellAction();
     ShellAction(const std::string& name);
     const std::vector<std::string>& getShellCommands() const;
+    void setShellCommands(const std::vector<std::string>& shellCommands);
 
     bool performAction() override;
     void addCommand(const std::string& command);
 
     void updateName() override;
+    void graphicalEdit(Gtk::Window& parent) override;
 
 private:
     std::vector<std::string> shellCommands;

@@ -21,25 +21,36 @@
  */
 
 
-#ifndef GDFM_MODEL_COLUMN_RECORD_H
-#define GDFM_MODEL_COLUMN_RECORD_H
+#ifndef SHELL_EDITOR_H
+#define SHELL_EDITOR_H
 
 #include <gtkmm.h>
 
-#include "module.h"
-#include "moduleaction.h"
+#include "shellaction.h"
 
 namespace gdfm {
 
-class GdfmModelColumnRecord : public Gtk::TreeModelColumnRecord {
+class ShellEditor : public Gtk::Dialog {
 public:
-    GdfmModelColumnRecord();
-    Gtk::TreeModelColumn<Glib::ustring> moduleNameColumn;
-    Gtk::TreeModelColumn<Glib::ustring> actionNameColumn;
-    Gtk::TreeModelColumn<Glib::ustring> fileColumn;
-    Gtk::TreeModelColumn<std::shared_ptr<Module>> moduleColumn;
-    Gtk::TreeModelColumn<std::shared_ptr<ModuleAction>> actionColumn;
+    ShellEditor(Gtk::Window& parent, ShellAction* action);
+
+private:
+    ShellAction* action;
+    Gtk::Entry* nameEntry;
+    Gtk::TreeView* commandsView;
+    Gtk::Entry* commandEntry;
+    Gtk::Button* removeCommandButton;
+
+    Gtk::TreeModelColumnRecord columns;
+    Glib::RefPtr<Gtk::TreeSelection> commandsSelection;
+    Glib::RefPtr<Gtk::ListStore> commandsStore;
+    Gtk::TreeModelColumn<Glib::ustring> commandColumn;
+
+    void onCommandsSelectionChanged();
+    void onAddCommandButtonClicked();
+    void onRemoveCommandButtonClicked();
+    void onResponse(int responseId);
 };
 } /* namespace gdfm */
 
-#endif /* GDFM_MODEL_COLUMN_RECORD_H */
+#endif /* SHELL_EDITOR_H */
