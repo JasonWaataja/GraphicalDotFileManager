@@ -24,21 +24,45 @@
 #ifndef CREATE_MODULE_DIALOG_H
 #define CREATE_MODULE_DIALOG_H
 
+#include <memory>
+
 #include <gtkmm.h>
+
+#include "module.h"
 
 namespace gdfm {
 
 class CreateModuleDialog : public Gtk::Dialog {
 public:
-    CreateModuleDialog(
-        BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder);
+    CreateModuleDialog(Gtk::Window& parent);
+    virtual ~CreateModuleDialog();
 
-    static Glib::RefPtr<CreateModuleDialog> create();
+    std::shared_ptr<Module> getModule();
 
 private:
+    Gtk::VBox* contentBox;
+    Gtk::HBox* nameBox;
+    Gtk::Label* nameLabel;
     Gtk::Entry* nameEntry;
+    Gtk::HBox* filesBox;
+    Gtk::ScrolledWindow* scrollWindow;
     Gtk::TreeView* filesView;
+    Gtk::VBox* actionBox;
+    Gtk::Entry* filenameEntry;
+    Gtk::Entry* destinationEntry;
     Gtk::Button* addFileButton;
+    Gtk::Button* removeFileButton;
+
+    Glib::RefPtr<Gtk::TreeSelection> filesViewSelection;
+    Glib::RefPtr<Gtk::ListStore> filesList;
+    Gtk::TreeModelColumnRecord record;
+    Gtk::TreeModelColumn<Glib::ustring> filenameColumn;
+    Gtk::TreeModelColumn<Glib::ustring> destinationColumn;
+
+    /* Signal handlers. */
+    void onAddFileButtonClicked();
+    void onFilesViewSelectionChanged();
+    void onRemoveFileButtonClicked();
 };
 } /* namespace 2017 */
 

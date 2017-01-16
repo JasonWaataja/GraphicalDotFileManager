@@ -181,6 +181,14 @@ bool copyFile(
  * Returns one.
  */
 int returnOne(const struct dirent* entry);
+
+/*
+ * Finds the canonical path for the given path using the realpath function.
+ * Terminates the program if there is an error allocating memory.
+ *
+ * Returns a path pointing to the same file with extra slashes removed, etc.
+ */
+std::string getCanonicalPath(const std::string& path);
 } /* namespace gdfm */
 
 #endif /* UTIL_H */

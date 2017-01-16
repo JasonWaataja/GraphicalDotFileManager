@@ -314,48 +314,16 @@ ConfigFileReader::processLineAsFile(const std::string& line)
         return false;
     }
     int argumentCount = arguments.size();
-    InstallAction* installAction = nullptr;
-    RemoveAction* removeAction = nullptr;
-    FileCheckAction* checkAction = nullptr;
-    std::string currentDirectory = environment.getDirectory();
-    std::string homeDirectory = environment.getVariable("default-directory");
-    std::string sourcePath;
-    std::string destinationPath;
-    if (argumentCount == 1) {
-        sourcePath = currentDirectory + "/" + arguments[0];
-        destinationPath = homeDirectory + "/" + arguments[0];
-        installAction =
-            new InstallAction(arguments[0], currentDirectory, homeDirectory);
-    } else if (argumentCount == 2) {
-        sourcePath = currentDirectory + "/" + arguments[0];
-        destinationPath = shellExpandPath(arguments[1]) + "/" + arguments[0];
-        installAction = new InstallAction(
-            arguments[0], currentDirectory, shellExpandPath(arguments[1]));
-    } else if (argumentCount == 3) {
-        sourcePath = shellExpandPath(arguments[1]) + "/" + arguments[0];
-        destinationPath = shellExpandPath(arguments[2]) + "/" + arguments[0];
-        installAction = new InstallAction(arguments[0],
-            shellExpandPath(arguments[1]), shellExpandPath(arguments[2]));
-    } else if (argumentCount == 4) {
-        sourcePath = shellExpandPath(arguments[1]) + "/" + arguments[0];
-        destinationPath = shellExpandPath(arguments[3]) + "/" + arguments[2];
-        installAction =
-            new InstallAction(arguments[0], shellExpandPath(arguments[1]),
-                arguments[3], shellExpandPath(arguments[4]));
-    } else {
-        errorMessage(line, "Incorrect number of arguments to file.");
+    if (argumentCount == 1)
+        currentModule->addFile(arguments[0]);
+    else if (argumentCount == 2)
+        currentModule->addFile(arguments[0], arguments[1]);
+    else if (argumentCount == 3)
+        currentModule->addFile(arguments[0], arguments[1], arguments[2]);
+    else {
+        errorMessage(line, "Too many arguments to file line.");
         return false;
     }
-    removeAction = new RemoveAction(destinationPath);
-    checkAction = new FileCheckAction(sourcePath, destinationPath);
-    setModuleActionFlags(installAction);
-    setModuleActionFlags(removeAction);
-    setModuleActionFlags(checkAction);
-    currentModule->addInstallAction(
-        std::shared_ptr<ModuleAction>(installAction));
-    currentModule->addUninstallAction(
-        std::shared_ptr<ModuleAction>(removeAction));
-    currentModule->addUpdateAction(std::shared_ptr<ModuleAction>(checkAction));
     return true;
 }
 

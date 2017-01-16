@@ -36,6 +36,7 @@ public:
     GdfmModelColumnRecord();
     Gtk::TreeModelColumn<Glib::ustring> moduleNameColumn;
     Gtk::TreeModelColumn<Glib::ustring> actionNameColumn;
+    Gtk::TreeModelColumn<Glib::ustring> fileColumn;
     Gtk::TreeModelColumn<std::shared_ptr<Module>> moduleColumn;
     Gtk::TreeModelColumn<std::shared_ptr<ModuleAction>> actionColumn;
 };

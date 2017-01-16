@@ -85,6 +85,7 @@ GdfmWindow::initModulesView()
     modulesStore = Gtk::TreeStore::create(columns);
     modulesView->set_model(modulesStore);
     modulesView->append_column("Module", columns.moduleNameColumn);
+    modulesView->append_column("Files", columns.fileColumn);
     modulesView->append_column("Actions", columns.actionNameColumn);
 
     modulesSelection = modulesView->get_selection();
@@ -138,6 +139,13 @@ GdfmWindow::appendModule(const Module& module)
     Gtk::TreeModel::Row topRow = *topIter;
     topRow[columns.moduleNameColumn] = module.getName();
     topRow[columns.moduleColumn] = std::shared_ptr<Module>(new Module(module));
+
+    for (const auto& file : module.getFiles()) {
+        Gtk::TreeIter fileIter = modulesStore->append(topRow.children());
+        Gtk::TreeRow fileRow = *fileIter;
+        fileRow[columns.fileColumn] = file.getFilename();
+    }
+
     const std::vector<std::shared_ptr<ModuleAction>> installActions =
         module.getInstallActions();
     if (installActions.size() > 0) {
@@ -188,7 +196,13 @@ GdfmWindow::appendModule(const Module& module)
 void
 GdfmWindow::onAddModuleButtonClicked()
 {
-    createModuleDialog();;
+    CreateModuleDialog dialog(*this);
+    int response = dialog.run();
+    if (response == Gtk::RESPONSE_OK) {
+        std::shared_ptr<Module> module = dialog.getModule();
+        if (module)
+            appendModule(*module);
+    }
 }
 
 void
@@ -255,8 +269,8 @@ GdfmWindow::onModulesViewRowActivated(
 std::shared_ptr<Module>
 GdfmWindow::createModuleDialog()
 {
-    auto dialog = CreateModuleDialog::create();
-    dialog->run();
+    CreateModuleDialog dialog(*this);
+    dialog.run();
     return std::shared_ptr<Module>();
 }
 } /* namespace gdfm */

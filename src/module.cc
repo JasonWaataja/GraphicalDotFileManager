@@ -47,13 +47,22 @@ Module::setName(const std::string& name)
 }
 
 bool
-Module::install() const
+Module::install(const std::string& sourceDirectory) const
 {
+    for (const auto& file : files) {
+        std::shared_ptr<InstallAction> installAction =
+            file.createInstallAction(sourceDirectory);
+        if (installAction->performAction()) {
+            warnx("Failed to perform action \"%s\".",
+                installAction->getName().c_str());
+            return false;
+        }
+    }
     for (const auto& action : installActions) {
         bool status = action->performAction();
         if (!status) {
             warnx(
-                "Failed to install module \"%s\".", action->getName().c_str());
+                "Failed to perform action \"%s\".", action->getName().c_str());
             return false;
         }
     }
@@ -61,13 +70,22 @@ Module::install() const
 }
 
 bool
-Module::uninstall() const
+Module::uninstall(const std::string& sourceDirectory) const
 {
+    for (const auto& file : files) {
+        std::shared_ptr<RemoveAction> uninstallAction =
+            file.createUninstallAction();
+        if (uninstallAction->performAction()) {
+            warnx("Failed to perform action \"%s\".",
+                uninstallAction->getName().c_str());
+            return false;
+        }
+    }
     for (const auto& action : uninstallActions) {
         bool status = action->performAction();
         if (!status) {
-            warnx("Failed to uninstall module \"%s\".",
-                action->getName().c_str());
+            warnx(
+                "Failed to perform action \"%s\".", action->getName().c_str());
             return false;
         }
     }
@@ -76,13 +94,22 @@ Module::uninstall() const
 
 
 bool
-Module::update() const
+Module::update(const std::string& sourceDirectory) const
 {
+    for (const auto& file : files) {
+        std::shared_ptr<FileCheckAction> updateAction =
+            file.createUpdateAction(sourceDirectory);
+        if (!updateAction->performAction()) {
+            warnx("Failed to perform action \"%s\".",
+                updateAction->getName().c_str());
+            return false;
+        }
+    }
     for (const auto& action : updateActions) {
         bool status = action->performAction();
         if (!status) {
             warnx(
-                "Failed to update module \"%s\".", action->getName().c_str());
+                "Failed to perform action \"%s\".", action->getName().c_str());
             return false;
         }
     }
@@ -123,5 +150,33 @@ const std::vector<std::shared_ptr<ModuleAction>>&
 Module::getUpdateActions() const
 {
     return updateActions;
+}
+
+void
+Module::addFile(const std::string& filename)
+{
+    files.push_back(ModuleFile(filename));
+}
+
+void
+Module::addFile(
+    const std::string& filename, const std::string& destinationDirectory)
+{
+    files.push_back(ModuleFile(filename, destinationDirectory));
+}
+
+void
+Module::addFile(const std::string& filename,
+    const std::string& destinationDirectory,
+    const std::string& destinationFilename)
+{
+    files.push_back(
+        ModuleFile(filename, destinationDirectory, destinationFilename));
+}
+
+const std::vector<ModuleFile>
+Module::getFiles() const
+{
+    return files;
 }
 } /* namespace gdfm */

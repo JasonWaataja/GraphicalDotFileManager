@@ -28,6 +28,7 @@ GdfmModelColumnRecord::GdfmModelColumnRecord()
 {
     add(moduleNameColumn);
     add(actionNameColumn);
+    add(fileColumn);
     add(moduleColumn);
     add(actionColumn);
 }

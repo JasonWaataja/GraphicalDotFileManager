@@ -28,6 +28,7 @@
 #include <err.h>
 #include <libgen.h>
 #include <pwd.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 /* For compatability with OpenBSD, which doesn't include wordexp.h. */
@@ -353,5 +354,16 @@ int
 returnOne(const struct dirent* entry)
 {
     return 1;
+}
+
+std::string
+getCanonicalPath(const std::string& path)
+{
+    char* realPath = realpath(path.c_str(), NULL);
+    if (realPath == NULL)
+        err(EXIT_FAILURE, NULL);
+    std::string asString(realPath);
+    free(realPath);
+    return asString;
 }
 } /* namespace gdfm */

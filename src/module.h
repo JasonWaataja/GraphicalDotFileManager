@@ -28,6 +28,7 @@
 #include <vector>
 
 #include "moduleaction.h"
+#include "modulefile.h"
 
 namespace gdfm {
 
@@ -37,12 +38,18 @@ class Module {
 public:
     Module();
     Module(const std::string& name);
+    void addFile(const std::string& filename);
+    void addFile(
+        const std::string& filename, const std::string& destinationDirectory);
+    void addFile(const std::string& filename,
+        const std::string& destinationDirectory,
+        const std::string& destinationFilename);
     void addInstallAction(std::shared_ptr<ModuleAction> action);
     void addUninstallAction(std::shared_ptr<ModuleAction> action);
     void addUpdateAction(std::shared_ptr<ModuleAction> action);
-    bool install() const;
-    bool uninstall() const;
-    bool update() const;
+    bool install(const std::string& sourceDirectory) const;
+    bool uninstall(const std::string& sourceDirectory) const;
+    bool update(const std::string& sourceDirectory) const;
     const std::vector<std::shared_ptr<ModuleAction>>&
     getInstallActions() const;
     const std::vector<std::shared_ptr<ModuleAction>>&
@@ -50,9 +57,11 @@ public:
     const std::vector<std::shared_ptr<ModuleAction>>& getUpdateActions() const;
     const std::string& getName() const;
     void setName(const std::string& name);
+    const std::vector<ModuleFile> getFiles() const;
 
 private:
     std::string name;
+    std::vector<ModuleFile> files;
     std::vector<std::shared_ptr<ModuleAction>> installActions;
     std::vector<std::shared_ptr<ModuleAction>> uninstallActions;
     std::vector<std::shared_ptr<ModuleAction>> updateActions;
