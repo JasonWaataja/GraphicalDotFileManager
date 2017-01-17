@@ -101,4 +101,10 @@ void
 ModuleAction::graphicalEdit(Gtk::Window& parent)
 {
 }
+
+std::vector<std::string>
+ModuleAction::createConfigLines() const
+{
+    return std::vector<std::string>();
+}
 } /* namespace gdfm */

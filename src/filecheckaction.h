@@ -53,6 +53,7 @@ public:
     bool shouldUpdate() const;
 
     void updateName() override;
+    std::vector<std::string> createConfigLines() const override;
 
 private:
     /* Returns if neither path is a zero-length string. */

@@ -121,4 +121,15 @@ ModuleFile::createUpdateAction(const std::string& sourceDirectory) const
     return std::shared_ptr<FileCheckAction>(new FileCheckAction(
         getSourcePath(sourceDirectory), getDestinationPath()));
 }
+
+std::vector<std::string>
+ModuleFile::createConfigLines() const
+{
+    std::string line = filename;
+    line += " " + destinationDirectory;
+    line += " " + destinationFilename;
+    std::vector<std::string> lines;
+    lines.push_back(line);
+    return lines;
+}
 } /* namespace gdfm */

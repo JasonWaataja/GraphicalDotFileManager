@@ -55,6 +55,7 @@ public:
     std::string getDependenciesAsString(const std::string& delimiter) const;
 
     void updateName() override;
+    std::vector<std::string> createConfigLines() const override;
 
 private:
     std::vector<std::string> dependencies;

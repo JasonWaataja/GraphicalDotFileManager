@@ -59,6 +59,8 @@ public:
     std::shared_ptr<FileCheckAction> createUpdateAction(
         const std::string& sourceDirectory) const;
 
+    std::vector<std::string> createConfigLines() const;
+
 private:
     std::string filename;
     std::string destinationDirectory;

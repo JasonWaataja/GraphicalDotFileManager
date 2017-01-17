@@ -59,6 +59,8 @@ public:
     void setName(const std::string& name);
     const std::vector<ModuleFile> getFiles() const;
 
+    std::vector<std::string> createConfigLines() const;
+
 private:
     std::string name;
     std::vector<ModuleFile> files;

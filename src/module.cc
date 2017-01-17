@@ -179,4 +179,36 @@ Module::getFiles() const
 {
     return files;
 }
+
+std::vector<std::string>
+Module::createConfigLines() const
+{
+    std::vector<std::string> lines;
+    lines.push_back(name + ":");
+    for (const auto& file : files)
+        lines.push_back("\t" + file.createConfigLines()[0]);
+    if (installActions.size() > 0)
+        lines.push_back("install:");
+    /*
+     * It would make more sense to include this type of block in the if
+     * statement above it but this way leads to less indentation.
+     */
+    for (const auto& action : installActions) {
+        for (const auto& line : action->createConfigLines())
+            lines.push_back("\t" + line);
+    }
+    if (uninstallActions.size() > 0)
+        lines.push_back("uninstall:");
+    for (const auto& action : uninstallActions) {
+        for (const auto& line : action->createConfigLines())
+            lines.push_back("\t" + line);
+    }
+    if (updateActions.size() > 0)
+        lines.push_back("update:");
+    for (const auto& action : updateActions) {
+        for (const auto& line : action->createConfigLines())
+            lines.push_back("\t" + line);
+    }
+    return lines;
+}
 } /* namespace gdfm */

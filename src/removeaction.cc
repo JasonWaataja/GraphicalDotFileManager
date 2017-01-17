@@ -87,4 +87,12 @@ RemoveAction::updateName()
     setName(name);
     free(pathCopy);
 }
+
+std::vector<std::string>
+RemoveAction::createConfigLines() const
+{
+    std::vector<std::string> lines;
+    lines.push_back("remove " + filePath);
+    return lines;
+}
 } /* namespace gdfm */

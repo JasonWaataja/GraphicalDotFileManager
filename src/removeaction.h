@@ -3,8 +3,6 @@
 #ifndef REMOVE_ACTION_H
 #define REMOVE_ACTION_H
 
-#include <string>
-
 #include "moduleaction.h"
 
 namespace gdfm {
@@ -22,6 +20,7 @@ public:
     bool performAction() override;
 
     void updateName() override;
+    std::vector<std::string> createConfigLines() const override;
 
 private:
     std::string filePath;

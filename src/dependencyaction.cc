@@ -154,4 +154,15 @@ DependencyAction::updateName()
 {
     setName("Dependency Check");
 }
+
+std::vector<std::string>
+DependencyAction::createConfigLines() const
+{
+    std::string line = "depend";
+    for (const auto& dependency : dependencies)
+        line += " " + dependency;
+    std::vector<std::string> lines;
+    lines.push_back(line);
+    return lines;
+}
 } /* namespace gdfm */

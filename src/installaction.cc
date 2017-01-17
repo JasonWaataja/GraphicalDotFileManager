@@ -148,4 +148,17 @@ InstallAction::updateName()
 {
     setName(filename);
 }
+
+std::vector<std::string>
+InstallAction::createConfigLines() const
+{
+    std::string line = "install";
+    line += " " + filename;
+    line += " " + sourceDirectory;
+    line += " " + installFilename;
+    line += " " + destinationDirectory;
+    std::vector<std::string> lines;
+    lines.push_back(line);
+    return lines;
+}
 } /* namespace gdfm */

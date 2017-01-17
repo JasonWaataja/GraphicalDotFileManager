@@ -93,4 +93,14 @@ ShellAction::graphicalEdit(Gtk::Window& parent)
     ShellEditor editor(parent, this);
     editor.run();
 }
+
+std::vector<std::string>
+ShellAction::createConfigLines() const
+{
+    std::vector<std::string> lines;
+    lines.push_back("sh");
+    for (const auto& command : shellCommands)
+        lines.push_back("\t" + command);
+    return lines;
+}
 } /* namespace gdfm */

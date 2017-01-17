@@ -31,6 +31,7 @@
 #include <iostream>
 
 #include "configfilereader.h"
+#include "configfilewriter.h"
 #include "createmoduledialog.h"
 #include "util.h"
 
@@ -244,11 +245,65 @@ GdfmWindow::onActionOpenDirectory()
 void
 GdfmWindow::onActionSave()
 {
+    std::string outputFile = currentFilePath;
+    if (outputFile.length() == 0) {
+        Gtk::FileChooserDialog dialog(
+            *this, "Save", Gtk::FILE_CHOOSER_ACTION_SAVE);
+        dialog.set_select_multiple(false);
+        dialog.set_current_folder(getHomeDirectory());
+        dialog.set_filename("config.dfm");
+        dialog.add_button("Select", Gtk::RESPONSE_OK);
+        dialog.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+        int response = dialog.run();
+        if (response == Gtk::RESPONSE_OK)
+            outputFile = dialog.get_filename();
+        else
+            return;
+    }
+    ConfigFileWriter writer(outputFile, modules);
+    if (!writer.isOpen()) {
+        Gtk::MessageDialog dialog(*this,
+            "Failed to open file " + outputFile + ".", false,
+            Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
+        dialog.run();
+    }
+    bool status = writer.writeModules();
+    if (!status) {
+        Gtk::MessageDialog dialog(*this,
+            "Failed to write to file " + outputFile + ".", false,
+            Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
+        dialog.run();
+    }
 }
 
 void
 GdfmWindow::onActionSaveAs()
 {
+    Gtk::FileChooserDialog dialog(
+        *this, "Save As", Gtk::FILE_CHOOSER_ACTION_SAVE);
+    dialog.set_select_multiple(false);
+    dialog.set_current_folder(getHomeDirectory());
+    dialog.set_filename("config.dfm");
+    dialog.add_button("Select", Gtk::RESPONSE_OK);
+    dialog.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+    int response = dialog.run();
+    if (response != Gtk::RESPONSE_OK)
+        return;
+    std::string outputFile = dialog.get_filename();
+    ConfigFileWriter writer(outputFile, modules);
+    if (!writer.isOpen()) {
+        Gtk::MessageDialog dialog(*this,
+            "Failed to open file " + outputFile + ".", false,
+            Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
+        dialog.run();
+    }
+    bool status = writer.writeModules();
+    if (!status) {
+        Gtk::MessageDialog dialog(*this,
+            "Failed to write to file " + outputFile + ".", false,
+            Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
+        dialog.run();
+    }
 }
 
 void

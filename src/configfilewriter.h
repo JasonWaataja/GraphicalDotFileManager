@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Jason Waataja
+ * Copyright (c) 2017 Jason Waataja
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,36 +20,38 @@
  * IN THE SOFTWARE.
  */
 
-#ifndef SHELL_ACTION_H
-#define SHELL_ACTION_H
+
+#ifndef CONFIG_FILE_WRITER_H
+#define CONFIG_FILE_WRITER_H
 
 #include <string>
 #include <vector>
+#include <fstream>
 
-#include "moduleaction.h"
+#include "module.h"
 
 namespace gdfm {
 
-const char SHELL_PROCESS[] = "/usr/bin/env bash";
-const char DEFAULT_SHELL_ACTION_NAME[] = "shell command";
-
-class ShellAction : public ModuleAction {
+class ConfigFileWriter {
 public:
-    ShellAction();
-    ShellAction(const std::string& name);
-    const std::vector<std::string>& getShellCommands() const;
-    void setShellCommands(const std::vector<std::string>& shellCommands);
+    ConfigFileWriter(
+        const std::string& path, const std::vector<Module> modules);
+    ~ConfigFileWriter();
 
-    bool performAction() override;
-    void addCommand(const std::string& command);
+    bool writeModules();
+    bool isOpen() const;
+    void close();
 
-    void updateName() override;
-    void graphicalEdit(Gtk::Window& parent) override;
-    std::vector<std::string> createConfigLines() const override;
+    const std::string& getPath() const;
+    void setPath(const std::string& path);
+    const std::vector<Module>& getModules() const;
+    void setModules(const std::vector<Module>& modules);
 
 private:
-    std::vector<std::string> shellCommands;
+    std::ofstream writer;
+    std::string path;
+    std::vector<Module> modules;
 };
 } /* namespace gdfm */
 
-#endif /* SHELL_ACTION_H */
+#endif /* CONFIG_FILE_WRITER_H */

@@ -50,6 +50,7 @@ public:
     void setInstallFilename(const std::string& installFilename);
 
     void updateName() override;
+    std::vector<std::string> createConfigLines() const override;
 
 private:
     std::string filename;

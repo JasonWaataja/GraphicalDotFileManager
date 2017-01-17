@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Jason Waataja
+ * Copyright (c) 2017 Jason Waataja
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,65 +20,75 @@
  * IN THE SOFTWARE.
  */
 
-#include "messageaction.h"
+#include "configfilewriter.h"
 
-#include <iostream>
-#include <sstream>
-
-#include "messageeditor.h"
+#include <err.h>
 
 namespace gdfm {
 
-MessageAction::MessageAction(const std::string& message) : message(message)
+ConfigFileWriter::ConfigFileWriter(
+    const std::string& path, const std::vector<Module> modules)
+    : path(path), modules(modules)
 {
-    updateName();
+    writer.open(path);
+}
+
+ConfigFileWriter::~ConfigFileWriter()
+{
+    if (isOpen())
+        close();
 }
 
 bool
-MessageAction::performAction()
+ConfigFileWriter::writeModules()
 {
-    std::cout << message << std::endl;
+    if (!isOpen()) {
+        warnx("Attempting to write to non-open writer.");
+        return false;
+    }
+    for (const auto& module : modules) {
+        for (const auto& line : module.createConfigLines())
+            writer << line << std::endl;
+        writer << std::endl;
+    }
     return true;
 }
 
+bool
+ConfigFileWriter::isOpen() const
+{
+    return writer.is_open();
+}
+
+void
+ConfigFileWriter::close()
+{
+    writer.close();
+}
+
 const std::string&
-MessageAction::getMessage() const
+ConfigFileWriter::getPath() const
 {
-    return message;
+    return path;
 }
 
 void
-MessageAction::setMessage(const std::string& message)
+ConfigFileWriter::setPath(const std::string& path)
 {
-    this->message = message;
+    this->path = path;
+    writer.close();
+    writer.open(path);
+}
+
+const std::vector<Module>&
+ConfigFileWriter::getModules() const
+{
+    return modules;
 }
 
 void
-MessageAction::updateName()
+ConfigFileWriter::setModules(const std::vector<Module>& modules)
 {
-    setName("Message");
-}
-
-void
-MessageAction::graphicalEdit(Gtk::Window& parent)
-{
-    MessageEditor editor(parent, this);
-    editor.run();
-}
-
-std::vector<std::string>
-MessageAction::createConfigLines() const
-{
-    std::ostringstream outputStream;
-    for (std::string::size_type i = 0; i < message.length(); i++) {
-        if (message[i] == '"')
-            outputStream << "\\\"";
-        else
-            outputStream << message[i];
-    }
-    std::string line = "message \"" + outputStream.str() + "\"";
-    std::vector<std::string> lines;
-    lines.push_back(line);
-    return lines;
+    this->modules = modules;
 }
 } /* namespace gdfm */

@@ -296,4 +296,12 @@ FileCheckAction::updateName()
     setName(name);
     free(sourceCopy);
 }
+
+std::vector<std::string>
+FileCheckAction::createConfigLines() const
+{
+    std::vector<std::string> lines;
+    lines.push_back("remove " + sourcePath + " " + destinationPath);
+    return lines;
+}
 } /* namespace gdfm */
