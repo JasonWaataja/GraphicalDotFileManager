@@ -29,7 +29,6 @@
 
 #include <gtkmm.h>
 
-#include "gdfmmodelcolumnrecord.h"
 #include "module.h"
 
 namespace gdfm {
@@ -40,6 +39,18 @@ public:
         BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder);
     virtual ~GdfmWindow();
 
+    /*
+     * This is a type to make testing what type of row is much easier. Before,
+     * it would check to see if certain columns were filled and what their
+     * content was, but having an extra hidden column with the type makes the
+     * row activated signal handler easier to write.
+     */
+    enum RowType {
+        MODULE_ROW,
+        MODULE_TYPE_ROW,
+        MODULE_FILE_ROW,
+        MODULE_ACTION_ROW
+    };
     /*
      * Reads the modules in the file given by path. Sets the current file to
      * the given config file.
@@ -81,7 +92,15 @@ private:
     Gtk::Button* addModuleButton;
     Gtk::TreeView* modulesView;
 
-    GdfmModelColumnRecord columns;
+    /* Tree view related items. */
+    Gtk::TreeModelColumnRecord columns;
+    Gtk::TreeModelColumn<Glib::ustring> moduleNameColumn;
+    Gtk::TreeModelColumn<Glib::ustring> actionNameColumn;
+    Gtk::TreeModelColumn<Glib::ustring> fileColumn;
+    Gtk::TreeModelColumn<RowType> rowTypeColumn;
+    Gtk::TreeModelColumn<std::shared_ptr<Module>> moduleColumn;
+    Gtk::TreeModelColumn<std::shared_ptr<ModuleFile>> moduleFileColumn;
+    Gtk::TreeModelColumn<std::shared_ptr<ModuleAction>> actionColumn;
     Glib::RefPtr<Gtk::TreeStore> modulesStore;
 
     /*
@@ -115,6 +134,18 @@ private:
     void onAddModuleButtonClicked();
     void onModulesViewRowActivated(
         const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
+    void onModulesViewButtonPressEvent(GdkEventButton* button);
+    /*
+     * These signal handlers are specifically for the popup menu that can be
+     * created on the tree view.
+     */
+    void onAddModuleItemActivated();
+    void onModuleEditItemActivated(Gtk::TreeRowReference row);
+    void onModuleRemoveItemActivated(Gtk::TreeRowReference row);
+    void onModuleFileEditItemActivated(Gtk::TreeRowReference row);
+    void onModuleFileRemoveItemActivated(Gtk::TreeRowReference row);
+    void onModuleActionEditItemActivated(Gtk::TreeRowReference row);
+    void onModuleActionRemoveItemActivated(Gtk::TreeRowReference row);
 
     /* Actions for use with bar. */
     void onActionOpenFile();

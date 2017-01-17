@@ -61,6 +61,8 @@ public:
 
     std::vector<std::string> createConfigLines() const;
 
+    void graphicalEdit(Gtk::Window& window);
+
 private:
     std::string filename;
     std::string destinationDirectory;

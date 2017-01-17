@@ -22,6 +22,7 @@
 
 #include "modulefile.h"
 
+#include "modulefileeditor.h"
 #include "util.h"
 
 namespace gdfm {
@@ -131,5 +132,12 @@ ModuleFile::createConfigLines() const
     std::vector<std::string> lines;
     lines.push_back(line);
     return lines;
+}
+
+void
+ModuleFile::graphicalEdit(Gtk::Window& window)
+{
+    ModuleFileEditor editor(window, this);
+    editor.run();
 }
 } /* namespace gdfm */

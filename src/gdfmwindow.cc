@@ -65,6 +65,8 @@ GdfmWindow::connectSignals()
         sigc::mem_fun(*this, &GdfmWindow::onAddModuleButtonClicked));
     modulesView->signal_row_activated().connect(
         sigc::mem_fun(*this, &GdfmWindow::onModulesViewRowActivated));
+    modulesView->signal_button_press_event().connect_notify(
+        sigc::mem_fun(*this, &GdfmWindow::onModulesViewButtonPressEvent));
 }
 
 void
@@ -83,11 +85,18 @@ GdfmWindow::addActions()
 void
 GdfmWindow::initModulesView()
 {
+    columns.add(moduleNameColumn);
+    columns.add(actionNameColumn);
+    columns.add(fileColumn);
+    columns.add(rowTypeColumn);
+    columns.add(moduleColumn);
+    columns.add(moduleFileColumn);
+    columns.add(actionColumn);
     modulesStore = Gtk::TreeStore::create(columns);
     modulesView->set_model(modulesStore);
-    modulesView->append_column("Module", columns.moduleNameColumn);
-    modulesView->append_column("Files", columns.fileColumn);
-    modulesView->append_column("Actions", columns.actionNameColumn);
+    modulesView->append_column("Module", moduleNameColumn);
+    modulesView->append_column("Files", fileColumn);
+    modulesView->append_column("Actions", actionNameColumn);
 
     modulesSelection = modulesView->get_selection();
     modulesSelection->set_mode(Gtk::SELECTION_SINGLE);
@@ -138,13 +147,17 @@ GdfmWindow::appendModule(const Module& module)
 {
     Gtk::TreeModel::iterator topIter = modulesStore->append();
     Gtk::TreeModel::Row topRow = *topIter;
-    topRow[columns.moduleNameColumn] = module.getName();
-    topRow[columns.moduleColumn] = std::shared_ptr<Module>(new Module(module));
+    topRow[moduleNameColumn] = module.getName();
+    topRow[moduleColumn] = std::shared_ptr<Module>(new Module(module));
+    topRow[rowTypeColumn] = MODULE_ROW;
 
     for (const auto& file : module.getFiles()) {
         Gtk::TreeIter fileIter = modulesStore->append(topRow.children());
         Gtk::TreeRow fileRow = *fileIter;
-        fileRow[columns.fileColumn] = file.getFilename();
+        fileRow[fileColumn] = file.getFilename();
+        fileRow[moduleFileColumn] =
+            std::shared_ptr<ModuleFile>(new ModuleFile(file));
+        fileRow[rowTypeColumn] = MODULE_FILE_ROW;
     }
 
     const std::vector<std::shared_ptr<ModuleAction>> installActions =
@@ -153,13 +166,15 @@ GdfmWindow::appendModule(const Module& module)
         Gtk::TreeModel::iterator typeIter =
             modulesStore->append(topRow.children());
         Gtk::TreeModel::Row typeRow = *typeIter;
-        typeRow[columns.moduleNameColumn] = "Install";
+        typeRow[moduleNameColumn] = "Install";
+        typeRow[rowTypeColumn] = MODULE_TYPE_ROW;
         for (const auto& action : installActions) {
             Gtk::TreeModel::iterator actionIter =
                 modulesStore->append(typeRow.children());
             Gtk::TreeModel::Row actionRow = *actionIter;
-            actionRow[columns.actionNameColumn] = action->getName();
-            actionRow[columns.actionColumn] = action;
+            actionRow[actionNameColumn] = action->getName();
+            actionRow[actionColumn] = action;
+            actionRow[rowTypeColumn] = MODULE_ACTION_ROW;
         }
     }
     const std::vector<std::shared_ptr<ModuleAction>> uninstallActions =
@@ -168,13 +183,15 @@ GdfmWindow::appendModule(const Module& module)
         Gtk::TreeModel::iterator typeIter =
             modulesStore->append(topRow.children());
         Gtk::TreeModel::Row typeRow = *typeIter;
-        typeRow[columns.moduleNameColumn] = "Uninstall";
+        typeRow[moduleNameColumn] = "Uninstall";
+        typeRow[rowTypeColumn] = MODULE_TYPE_ROW;
         for (const auto& action : uninstallActions) {
             Gtk::TreeModel::iterator actionIter =
                 modulesStore->append(typeRow.children());
             Gtk::TreeModel::Row actionRow = *actionIter;
-            actionRow[columns.actionNameColumn] = action->getName();
-            actionRow[columns.actionColumn] = action;
+            actionRow[actionNameColumn] = action->getName();
+            actionRow[actionColumn] = action;
+            actionRow[rowTypeColumn] = MODULE_ACTION_ROW;
         }
     }
     const std::vector<std::shared_ptr<ModuleAction>> updateActions =
@@ -183,13 +200,15 @@ GdfmWindow::appendModule(const Module& module)
         Gtk::TreeModel::iterator typeIter =
             modulesStore->append(topRow.children());
         Gtk::TreeModel::Row typeRow = *typeIter;
-        typeRow[columns.moduleNameColumn] = "Update";
+        typeRow[moduleNameColumn] = "Update";
+        typeRow[rowTypeColumn] = MODULE_TYPE_ROW;
         for (const auto& action : updateActions) {
             Gtk::TreeModel::iterator actionIter =
                 modulesStore->append(typeRow.children());
             Gtk::TreeModel::Row actionRow = *actionIter;
-            actionRow[columns.actionNameColumn] = action->getName();
-            actionRow[columns.actionColumn] = action;
+            actionRow[actionNameColumn] = action->getName();
+            actionRow[actionColumn] = action;
+            actionRow[rowTypeColumn] = MODULE_ACTION_ROW;
         }
     }
 }
@@ -318,14 +337,18 @@ GdfmWindow::onModulesViewRowActivated(
 {
     Gtk::TreeIter iter = modulesStore->get_iter(path);
     Gtk::TreeRow row = *iter;
-    std::shared_ptr<ModuleAction> action = row[columns.actionColumn];
-    if (action) {
+    RowType type = row[rowTypeColumn];
+    /* I could use a switch statement here, but changing it wasn't worth it. */
+    if (type == MODULE_ACTION_ROW) {
+        std::shared_ptr<ModuleAction> action = row[actionColumn];
         action->graphicalEdit(*this);
-        /*
-         * This is just in case the name is updated in the editor. If it's
-         * changed, this makes it show up on the view.
-         */
-        row[columns.actionNameColumn] = action->getName();
+        /* This is just in case the action name changed. */
+        row[actionNameColumn] = action->getName();
+    } else if (type == MODULE_FILE_ROW) {
+        std::shared_ptr<ModuleFile> file = row[moduleFileColumn];
+        file->graphicalEdit(*this);
+        /* This is also just in case the name changed. */
+        row[fileColumn] = file->getFilename();
     }
 }
 
@@ -335,5 +358,165 @@ GdfmWindow::createModuleDialog()
     CreateModuleDialog dialog(*this);
     dialog.run();
     return std::shared_ptr<Module>();
+}
+
+void
+GdfmWindow::onModulesViewButtonPressEvent(GdkEventButton* button)
+{
+    if (button->type != GDK_BUTTON_PRESS
+        || button->button != GDK_BUTTON_SECONDARY)
+        return;
+
+    Gtk::TreePath selectedPath;
+
+    bool isOnRow =
+        modulesView->get_path_at_pos(button->x, button->y, selectedPath);
+
+    Gtk::Menu* menu = Gtk::manage(new Gtk::Menu());
+    /*
+     * I'm attaching it here so that if the function ends up returning it will
+     * still be deleted because it is attached to the window I think.
+     */
+    menu->accelerate(*this);
+    if (!isOnRow) {
+        Gtk::MenuItem* addModuleItem =
+            Gtk::manage(new Gtk::MenuItem("Add Module"));
+        addModuleItem->signal_activate().connect(
+            sigc::mem_fun(*this, &GdfmWindow::onAddModuleItemActivated));
+        menu->append(*addModuleItem);
+    } else {
+        Gtk::TreeIter selectedIter = modulesStore->get_iter(selectedPath);
+        Gtk::TreeRow selectedRow = *selectedIter;
+        Gtk::TreeRowReference selectedRowReference(modulesStore, selectedPath);
+        RowType type = selectedRow[rowTypeColumn];
+        if (type == MODULE_ROW) {
+            Gtk::MenuItem* editModuleItem =
+                Gtk::manage(new Gtk::MenuItem("Edit"));
+            editModuleItem->signal_activate().connect(
+                sigc::bind<Gtk::TreeRowReference>(
+                    sigc::mem_fun(
+                        *this, &GdfmWindow::onModuleEditItemActivated),
+                    selectedRowReference));
+            menu->append(*editModuleItem);
+            Gtk::MenuItem* removeModuleItem =
+                Gtk::manage(new Gtk::MenuItem("Remove"));
+            removeModuleItem->signal_activate().connect(
+                sigc::bind<Gtk::TreeRowReference>(
+                    sigc::mem_fun(
+                        *this, &GdfmWindow::onModuleRemoveItemActivated),
+                    selectedRowReference));
+            menu->append(*removeModuleItem);
+        } else if (type == MODULE_FILE_ROW) {
+            Gtk::MenuItem* editModuleFileItem =
+                Gtk::manage(new Gtk::MenuItem("Edit"));
+            editModuleFileItem->signal_activate().connect(
+                sigc::bind<Gtk::TreeRowReference>(
+                    sigc::mem_fun(
+                        *this, &GdfmWindow::onModuleFileEditItemActivated),
+                    selectedRowReference));
+            menu->append(*editModuleFileItem);
+            Gtk::MenuItem* removeModuleFileItem =
+                Gtk::manage(new Gtk::MenuItem("Remove"));
+            removeModuleFileItem->signal_activate().connect(
+                sigc::bind<Gtk::TreeRowReference>(
+                    sigc::mem_fun(
+                        *this, &GdfmWindow::onModuleFileRemoveItemActivated),
+                    selectedRowReference));
+            menu->append(*removeModuleFileItem);
+        } else if (type == MODULE_ACTION_ROW) {
+            Gtk::MenuItem* editModuleActionItem =
+                Gtk::manage(new Gtk::MenuItem("Edit"));
+            editModuleActionItem->signal_activate().connect(
+                sigc::bind<Gtk::TreeRowReference>(
+                    sigc::mem_fun(
+                        *this, &GdfmWindow::onModuleActionEditItemActivated),
+                    selectedRowReference));
+            menu->append(*editModuleActionItem);
+            Gtk::MenuItem* removeModuleActionItem =
+                Gtk::manage(new Gtk::MenuItem("Remove"));
+            removeModuleActionItem->signal_activate().connect(
+                sigc::bind<Gtk::TreeRowReference>(
+                    sigc::mem_fun(
+                        *this, &GdfmWindow::onModuleActionRemoveItemActivated),
+                    selectedRowReference));
+            menu->append(*removeModuleActionItem);
+        } else
+            return;
+    }
+    menu->show_all();
+    menu->popup(button->button, button->time);
+}
+
+void
+GdfmWindow::onAddModuleItemActivated()
+{
+    CreateModuleDialog dialog(*this);
+    int response = dialog.run();
+    if (response != Gtk::RESPONSE_OK)
+        return;
+    std::shared_ptr<Module> module = dialog.getModule();
+    if (module)
+        appendModule(*module);
+}
+
+void
+GdfmWindow::onModuleEditItemActivated(Gtk::TreeRowReference row)
+{
+}
+
+void
+GdfmWindow::onModuleRemoveItemActivated(Gtk::TreeRowReference row)
+{
+    if (!row.is_valid())
+        return;
+    Gtk::TreePath path = row.get_path();
+    Gtk::TreeIter iter = modulesStore->get_iter(path);
+    modulesStore->erase(iter);
+}
+
+void
+GdfmWindow::onModuleFileEditItemActivated(Gtk::TreeRowReference row)
+{
+    if (!row.is_valid())
+        return;
+    Gtk::TreePath path = row.get_path();
+    Gtk::TreeIter iter = modulesStore->get_iter(path);
+    Gtk::TreeRow selectedRow = *iter;
+    std::shared_ptr<ModuleFile> file = selectedRow[moduleFileColumn];
+    if (file)
+        file->graphicalEdit(*this);
+}
+
+void
+GdfmWindow::onModuleFileRemoveItemActivated(Gtk::TreeRowReference row)
+{
+    if (!row.is_valid())
+        return;
+    Gtk::TreePath path = row.get_path();
+    Gtk::TreeIter iter = modulesStore->get_iter(path);
+    modulesStore->erase(iter);
+}
+
+void
+GdfmWindow::onModuleActionEditItemActivated(Gtk::TreeRowReference row)
+{
+    if (!row.is_valid())
+        return;
+    Gtk::TreePath path = row.get_path();
+    Gtk::TreeIter iter = modulesStore->get_iter(path);
+    Gtk::TreeRow selectedRow = *iter;
+    std::shared_ptr<ModuleAction> action = selectedRow[actionColumn];
+    if (action)
+        action->graphicalEdit(*this);
+}
+
+void
+GdfmWindow::onModuleActionRemoveItemActivated(Gtk::TreeRowReference row)
+{
+    if (!row.is_valid())
+        return;
+    Gtk::TreePath path = row.get_path();
+    Gtk::TreeIter iter = modulesStore->get_iter(path);
+    modulesStore->erase(iter);
 }
 } /* namespace gdfm */

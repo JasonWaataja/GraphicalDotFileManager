@@ -21,25 +21,34 @@
  */
 
 
-#ifndef GDFM_MODEL_COLUMN_RECORD_H
-#define GDFM_MODEL_COLUMN_RECORD_H
+#ifndef MODULE_FILE_EDITOR_H
+#define MODULE_FILE_EDITOR_H
 
 #include <gtkmm.h>
 
-#include "module.h"
-#include "moduleaction.h"
+#include "modulefile.h"
 
 namespace gdfm {
 
-class GdfmModelColumnRecord : public Gtk::TreeModelColumnRecord {
+class ModuleFileEditor : public Gtk::Dialog {
 public:
-    GdfmModelColumnRecord();
-    Gtk::TreeModelColumn<Glib::ustring> moduleNameColumn;
-    Gtk::TreeModelColumn<Glib::ustring> actionNameColumn;
-    Gtk::TreeModelColumn<Glib::ustring> fileColumn;
-    Gtk::TreeModelColumn<std::shared_ptr<Module>> moduleColumn;
-    Gtk::TreeModelColumn<std::shared_ptr<ModuleAction>> actionColumn;
+    ModuleFileEditor(Gtk::Window& parent, ModuleFile* file);
+
+private:
+    ModuleFile* file;
+
+    Gtk::HBox filenameBox;
+    Gtk::Label filenameLabel;
+    Gtk::Entry filenameEntry;
+    Gtk::HBox destinationDirectoryBox;
+    Gtk::Label destinationDirectoryLabel;
+    Gtk::Entry destinationDirectoryEntry;
+    Gtk::HBox destinationFilenameBox;
+    Gtk::Label destinationFilenameLabel;
+    Gtk::Entry destinationFilenameEntry;
+
+    void onResponse(int responseId);
 };
 } /* namespace gdfm */
 
-#endif /* GDFM_MODEL_COLUMN_RECORD_H */
+#endif /* MODULE_FILE_EDITOR_H */

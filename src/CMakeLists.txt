@@ -31,13 +31,13 @@ set (SOURCES
 	readerenvironment.cc
 	removeaction.cc
 	shellaction.cc
-	gdfmmodelcolumnrecord.cc
 	util.cc
 	createmoduledialog.cc
 	modulefile.cc
 	messageeditor.cc
 	shelleditor.cc
 	configfilewriter.cc
+	modulefileeditor.cc
 	${CMAKE_CURRENT_BINARY_DIR}/resources.c)
 
 check_include_files (wordexp.h HAVE_WORDEXP_H)
