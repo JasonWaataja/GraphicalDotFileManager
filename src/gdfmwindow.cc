@@ -34,6 +34,7 @@
 #include "configfilewriter.h"
 #include "createmoduledialog.h"
 #include "util.h"
+#include "moduleactioneditor.h"
 
 namespace gdfm {
 
@@ -389,57 +390,43 @@ GdfmWindow::onModulesViewButtonPressEvent(GdkEventButton* button)
         Gtk::TreeRow selectedRow = *selectedIter;
         Gtk::TreeRowReference selectedRowReference(modulesStore, selectedPath);
         RowType type = selectedRow[rowTypeColumn];
+        auto addMenuItem = [this, &menu, &selectedRowReference](
+            const std::string& name,
+            const sigc::slot<void, Gtk::TreeRowReference>& slot) {
+            Gtk::MenuItem* item = Gtk::manage(new Gtk::MenuItem(name));
+            item->signal_activate().connect(
+                sigc::bind<Gtk::TreeRowReference>(slot, selectedRowReference));
+            menu->append(*item);
+        };
         if (type == MODULE_ROW) {
-            Gtk::MenuItem* editModuleItem =
-                Gtk::manage(new Gtk::MenuItem("Edit"));
-            editModuleItem->signal_activate().connect(
-                sigc::bind<Gtk::TreeRowReference>(
-                    sigc::mem_fun(
-                        *this, &GdfmWindow::onModuleEditItemActivated),
-                    selectedRowReference));
-            menu->append(*editModuleItem);
-            Gtk::MenuItem* removeModuleItem =
-                Gtk::manage(new Gtk::MenuItem("Remove"));
-            removeModuleItem->signal_activate().connect(
-                sigc::bind<Gtk::TreeRowReference>(
-                    sigc::mem_fun(
-                        *this, &GdfmWindow::onModuleRemoveItemActivated),
-                    selectedRowReference));
-            menu->append(*removeModuleItem);
+            addMenuItem("Edit",
+                sigc::mem_fun(*this, &GdfmWindow::onModuleEditItemActivated));
+            addMenuItem(
+                "Remove", sigc::mem_fun(*this,
+                              &GdfmWindow::onModuleRemoveItemActivated));
+            addMenuItem("Add Install Action",
+                sigc::mem_fun(*this,
+                    &GdfmWindow::onModuleAddInstallActionItemActivated));
+            addMenuItem("Add Uninstall Action",
+                sigc::mem_fun(*this,
+                    &GdfmWindow::onModuleAddUninstallActionItemActivated));
+            addMenuItem("Add Update Action",
+                sigc::mem_fun(
+                    *this, &GdfmWindow::onModuleAddUpdateActionItemActivated));
         } else if (type == MODULE_FILE_ROW) {
-            Gtk::MenuItem* editModuleFileItem =
-                Gtk::manage(new Gtk::MenuItem("Edit"));
-            editModuleFileItem->signal_activate().connect(
-                sigc::bind<Gtk::TreeRowReference>(
-                    sigc::mem_fun(
-                        *this, &GdfmWindow::onModuleFileEditItemActivated),
-                    selectedRowReference));
-            menu->append(*editModuleFileItem);
-            Gtk::MenuItem* removeModuleFileItem =
-                Gtk::manage(new Gtk::MenuItem("Remove"));
-            removeModuleFileItem->signal_activate().connect(
-                sigc::bind<Gtk::TreeRowReference>(
-                    sigc::mem_fun(
-                        *this, &GdfmWindow::onModuleFileRemoveItemActivated),
-                    selectedRowReference));
-            menu->append(*removeModuleFileItem);
+            addMenuItem(
+                "Edit", sigc::mem_fun(*this,
+                            &GdfmWindow::onModuleFileEditItemActivated));
+            addMenuItem(
+                "Remove", sigc::mem_fun(*this,
+                              &GdfmWindow::onModuleFileRemoveItemActivated));
         } else if (type == MODULE_ACTION_ROW) {
-            Gtk::MenuItem* editModuleActionItem =
-                Gtk::manage(new Gtk::MenuItem("Edit"));
-            editModuleActionItem->signal_activate().connect(
-                sigc::bind<Gtk::TreeRowReference>(
-                    sigc::mem_fun(
-                        *this, &GdfmWindow::onModuleActionEditItemActivated),
-                    selectedRowReference));
-            menu->append(*editModuleActionItem);
-            Gtk::MenuItem* removeModuleActionItem =
-                Gtk::manage(new Gtk::MenuItem("Remove"));
-            removeModuleActionItem->signal_activate().connect(
-                sigc::bind<Gtk::TreeRowReference>(
-                    sigc::mem_fun(
-                        *this, &GdfmWindow::onModuleActionRemoveItemActivated),
-                    selectedRowReference));
-            menu->append(*removeModuleActionItem);
+            addMenuItem(
+                "Edit", sigc::mem_fun(*this,
+                            &GdfmWindow::onModuleActionEditItemActivated));
+            addMenuItem(
+                "Remove", sigc::mem_fun(*this,
+                              &GdfmWindow::onModuleActionRemoveItemActivated));
         } else
             return;
     }
@@ -472,6 +459,39 @@ GdfmWindow::onModuleRemoveItemActivated(Gtk::TreeRowReference row)
     Gtk::TreePath path = row.get_path();
     Gtk::TreeIter iter = modulesStore->get_iter(path);
     modulesStore->erase(iter);
+}
+
+void
+GdfmWindow::onModuleAddFileItemActivated(Gtk::TreeRowReference row)
+{
+}
+
+void
+GdfmWindow::onModuleAddInstallActionItemActivated(Gtk::TreeRowReference row)
+{
+    if (!row.is_valid())
+        return;
+    Gtk::TreePath path = row.get_path();
+    Gtk::TreeIter iter = modulesStore->get_iter(path);
+    Gtk::TreeRow referencedRow = *iter;
+
+    ModuleActionEditor editor(*this);
+    int response = editor.run();
+    if (response == Gtk::RESPONSE_OK) {
+        std::shared_ptr<ModuleAction> action = editor.getAction();
+        if (action) {
+        }
+    }
+}
+
+void
+GdfmWindow::onModuleAddUninstallActionItemActivated(Gtk::TreeRowReference row)
+{
+}
+
+void
+GdfmWindow::onModuleAddUpdateActionItemActivated(Gtk::TreeRowReference row)
+{
 }
 
 void

@@ -29,6 +29,10 @@
 
 namespace gdfm {
 
+MessageAction::MessageAction()
+{
+}
+
 MessageAction::MessageAction(const std::string& message) : message(message)
 {
     updateName();

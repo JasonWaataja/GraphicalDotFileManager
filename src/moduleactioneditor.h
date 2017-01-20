@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Jason Waataja
+ * Copyright (c) 2017 Jason Waataja
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,30 +20,42 @@
  * IN THE SOFTWARE.
  */
 
-#ifndef MESSAGE_ACTION_H
-#define MESSAGE_ACTION_H
 
-#include <string>
+#ifndef MODULE_ACTION_EDITOR_H
+#define MODULE_ACTION_EDITOR_H
+
+#include <memory>
+
+#include <gtkmm.h>
 
 #include "moduleaction.h"
 
 namespace gdfm {
 
-class MessageAction : public ModuleAction {
+class ModuleActionEditor : public Gtk::Dialog {
 public:
-    MessageAction();
-    MessageAction(const std::string& message);
-    bool performAction() override;
-    const std::string& getMessage() const;
-    void setMessage(const std::string& message);
+    ModuleActionEditor(Gtk::Window& parent);
 
-    void updateName() override;
-    void graphicalEdit(Gtk::Window& parent) override;
-    std::vector<std::string> createConfigLines() const override;
+    /*
+     * If the user has successfully created an action, then it returns a
+     * pointer to the newly created action.
+     *
+     * If the user has not completed one, though, or it is invalid, it returns
+     * a null smart pointer.
+     *
+     * Returns a smart pointer to a new ModuleAction created by the user if
+     * they did so, a null smart pointer otherwise.
+     */
+    std::shared_ptr<ModuleAction> getAction();
 
 private:
-    std::string message;
+    Gtk::ComboBoxText typeBox;
+    Gtk::Button createActionButton;
+
+    std::shared_ptr<ModuleAction> action;
+
+    void onCreateActionButtonClicked();
 };
 } /* namespace gdfm */
 
-#endif /* MESSAGE_ACTION_H */
+#endif /* MODULE_ACTION_EDITOR_H */

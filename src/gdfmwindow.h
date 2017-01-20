@@ -142,6 +142,10 @@ private:
     void onAddModuleItemActivated();
     void onModuleEditItemActivated(Gtk::TreeRowReference row);
     void onModuleRemoveItemActivated(Gtk::TreeRowReference row);
+    void onModuleAddFileItemActivated(Gtk::TreeRowReference row);
+    void onModuleAddInstallActionItemActivated(Gtk::TreeRowReference row);
+    void onModuleAddUninstallActionItemActivated(Gtk::TreeRowReference row);
+    void onModuleAddUpdateActionItemActivated(Gtk::TreeRowReference row);
     void onModuleFileEditItemActivated(Gtk::TreeRowReference row);
     void onModuleFileRemoveItemActivated(Gtk::TreeRowReference row);
     void onModuleActionEditItemActivated(Gtk::TreeRowReference row);
