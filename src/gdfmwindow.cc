@@ -33,8 +33,9 @@
 #include "configfilereader.h"
 #include "configfilewriter.h"
 #include "createmoduledialog.h"
-#include "util.h"
 #include "moduleactioneditor.h"
+#include "modulefileeditor.h"
+#include "util.h"
 
 namespace gdfm {
 
@@ -404,6 +405,9 @@ GdfmWindow::onModulesViewButtonPressEvent(GdkEventButton* button)
             addMenuItem(
                 "Remove", sigc::mem_fun(*this,
                               &GdfmWindow::onModuleRemoveItemActivated));
+            addMenuItem(
+                "Add File", sigc::mem_fun(*this,
+                                &GdfmWindow::onModuleAddFileItemActivated));
             addMenuItem("Add Install Action",
                 sigc::mem_fun(*this,
                     &GdfmWindow::onModuleAddInstallActionItemActivated));
@@ -464,6 +468,34 @@ GdfmWindow::onModuleRemoveItemActivated(Gtk::TreeRowReference row)
 void
 GdfmWindow::onModuleAddFileItemActivated(Gtk::TreeRowReference row)
 {
+    Gtk::TreePath path = row.get_path();
+    Gtk::TreeIter iter = modulesStore->get_iter(path);
+    Gtk::TreeRow referencedRow = *iter;
+
+    ModuleFile* file = new ModuleFile();
+    ModuleFileEditor editor(*this, file);
+    int response = editor.run();
+    if (response != Gtk::RESPONSE_OK) {
+        delete file;
+        return;
+    }
+    for (auto childIter = referencedRow.children().begin();
+         childIter != referencedRow.children().end(); childIter++) {
+        Gtk::TreeRow childRow = *childIter;
+        if (childRow[rowTypeColumn] == MODULE_TYPE_ROW) {
+            Gtk::TreeIter newIter = modulesStore->insert(childIter);
+            Gtk::TreeRow newRow = *newIter;
+            newRow[fileColumn] = file->getFilename();
+            newRow[moduleFileColumn] = std::shared_ptr<ModuleFile>(file);
+            newRow[rowTypeColumn] = MODULE_FILE_ROW;
+            return;
+        }
+    }
+    Gtk::TreeIter newIter = modulesStore->append(referencedRow.children());
+    Gtk::TreeRow newRow = *newIter;
+    newRow[fileColumn] = file->getFilename();
+    newRow[moduleFileColumn] = std::shared_ptr<ModuleFile>(file);
+    newRow[rowTypeColumn] = MODULE_FILE_ROW;
 }
 
 void
@@ -477,21 +509,71 @@ GdfmWindow::onModuleAddInstallActionItemActivated(Gtk::TreeRowReference row)
 
     ModuleActionEditor editor(*this);
     int response = editor.run();
-    if (response == Gtk::RESPONSE_OK) {
-        std::shared_ptr<ModuleAction> action = editor.getAction();
-        if (action) {
-        }
-    }
+    if (response != Gtk::RESPONSE_OK)
+        return;
+    std::shared_ptr<ModuleAction> action = editor.getAction();
+    if (!action)
+        return;
+    Gtk::TreeRowReference installRow = getInstallRow(referencedRow);
+    Gtk::TreePath installPath = installRow.get_path();
+    Gtk::TreeIter installIter = modulesStore->get_iter(installPath);
+    Gtk::TreeIter newIter = modulesStore->append(installIter->children());
+    Gtk::TreeRow newRow = *newIter;
+    newRow[actionNameColumn] = action->getName();
+    newRow[actionColumn] = action;
+    newRow[rowTypeColumn] = MODULE_ACTION_ROW;
 }
 
 void
 GdfmWindow::onModuleAddUninstallActionItemActivated(Gtk::TreeRowReference row)
 {
+    if (!row.is_valid())
+        return;
+    Gtk::TreePath path = row.get_path();
+    Gtk::TreeIter iter = modulesStore->get_iter(path);
+    Gtk::TreeRow referencedRow = *iter;
+
+    ModuleActionEditor editor(*this);
+    int response = editor.run();
+    if (response != Gtk::RESPONSE_OK)
+        return;
+    std::shared_ptr<ModuleAction> action = editor.getAction();
+    if (!action)
+        return;
+    Gtk::TreeRowReference uninstallRow = getUninstallRow(referencedRow);
+    Gtk::TreePath uninstallPath = uninstallRow.get_path();
+    Gtk::TreeIter uninstallIter = modulesStore->get_iter(uninstallPath);
+    Gtk::TreeIter newIter = modulesStore->append(uninstallIter->children());
+    Gtk::TreeRow newRow = *newIter;
+    newRow[actionNameColumn] = action->getName();
+    newRow[actionColumn] = action;
+    newRow[rowTypeColumn] = MODULE_ACTION_ROW;
 }
 
 void
 GdfmWindow::onModuleAddUpdateActionItemActivated(Gtk::TreeRowReference row)
 {
+    if (!row.is_valid())
+        return;
+    Gtk::TreePath path = row.get_path();
+    Gtk::TreeIter iter = modulesStore->get_iter(path);
+    Gtk::TreeRow referencedRow = *iter;
+
+    ModuleActionEditor editor(*this);
+    int response = editor.run();
+    if (response != Gtk::RESPONSE_OK)
+        return;
+    std::shared_ptr<ModuleAction> action = editor.getAction();
+    if (!action)
+        return;
+    Gtk::TreeRowReference updateRow = getUpdateRow(referencedRow);
+    Gtk::TreePath updatePath = updateRow.get_path();
+    Gtk::TreeIter updateIter = modulesStore->get_iter(updatePath);
+    Gtk::TreeIter newIter = modulesStore->append(updateIter->children());
+    Gtk::TreeRow newRow = *newIter;
+    newRow[actionNameColumn] = action->getName();
+    newRow[actionColumn] = action;
+    newRow[rowTypeColumn] = MODULE_ACTION_ROW;
 }
 
 void
@@ -538,5 +620,89 @@ GdfmWindow::onModuleActionRemoveItemActivated(Gtk::TreeRowReference row)
     Gtk::TreePath path = row.get_path();
     Gtk::TreeIter iter = modulesStore->get_iter(path);
     modulesStore->erase(iter);
+}
+
+Gtk::TreeRowReference
+GdfmWindow::getInstallRow(const Gtk::TreeRow& moduleRow)
+{
+    if (moduleRow[rowTypeColumn] != MODULE_ROW)
+        return Gtk::TreeRowReference();
+    for (auto iter = moduleRow.children().begin();
+         iter != moduleRow.children().end(); iter++) {
+        Gtk::TreeRow childRow = *iter;
+        if (childRow[rowTypeColumn] == MODULE_TYPE_ROW
+            && childRow[moduleNameColumn] == "Install") {
+            return Gtk::TreeRowReference(
+                modulesStore, modulesStore->get_path(iter));
+        }
+        if (childRow[rowTypeColumn] == MODULE_TYPE_ROW
+            && childRow[moduleNameColumn] != "Uninstall") {
+            Gtk::TreeIter newIter = modulesStore->insert(iter);
+            Gtk::TreeRow newRow = *newIter;
+            newRow[moduleNameColumn] = "Install";
+            newRow[rowTypeColumn] = MODULE_TYPE_ROW;
+            return Gtk::TreeRowReference(
+                modulesStore, modulesStore->get_path(newIter));
+        }
+    }
+    Gtk::TreeIter newIter = modulesStore->append(moduleRow.children());
+    Gtk::TreeRow newRow = *newIter;
+    newRow[moduleNameColumn] = "Install";
+    newRow[rowTypeColumn] = MODULE_TYPE_ROW;
+    return Gtk::TreeRowReference(
+        modulesStore, modulesStore->get_path(newIter));
+}
+
+Gtk::TreeRowReference
+GdfmWindow::getUninstallRow(const Gtk::TreeRow& moduleRow)
+{
+    if (moduleRow[rowTypeColumn] != MODULE_ROW)
+        return Gtk::TreeRowReference();
+    for (auto iter = moduleRow.children().begin();
+         iter != moduleRow.children().end(); iter++) {
+        Gtk::TreeRow childRow = *iter;
+        if (childRow[rowTypeColumn] == MODULE_TYPE_ROW
+            && childRow[moduleNameColumn] == "Uninstall") {
+            return Gtk::TreeRowReference(
+                modulesStore, modulesStore->get_path(iter));
+        }
+        if (childRow[rowTypeColumn] == MODULE_TYPE_ROW
+            && childRow[moduleNameColumn] == "Update") {
+            Gtk::TreeIter newIter = modulesStore->insert(iter);
+            Gtk::TreeRow newRow = *newIter;
+            newRow[moduleNameColumn] = "Uninstall";
+            newRow[rowTypeColumn] = MODULE_TYPE_ROW;
+            return Gtk::TreeRowReference(
+                modulesStore, modulesStore->get_path(newIter));
+        }
+    }
+    Gtk::TreeIter newIter = modulesStore->append(moduleRow.children());
+    Gtk::TreeRow newRow = *newIter;
+    newRow[moduleNameColumn] = "Uninstall";
+    newRow[rowTypeColumn] = MODULE_TYPE_ROW;
+    return Gtk::TreeRowReference(
+        modulesStore, modulesStore->get_path(newIter));
+}
+
+Gtk::TreeRowReference
+GdfmWindow::getUpdateRow(const Gtk::TreeRow& moduleRow)
+{
+    if (moduleRow[rowTypeColumn] != MODULE_ROW)
+        return Gtk::TreeRowReference();
+    for (auto iter = moduleRow.children().begin();
+         iter != moduleRow.children().end(); iter++) {
+        Gtk::TreeRow childRow = *iter;
+        if (childRow[rowTypeColumn] == MODULE_TYPE_ROW
+            && childRow[moduleNameColumn] == "Update") {
+            return Gtk::TreeRowReference(
+                modulesStore, modulesStore->get_path(iter));
+        }
+    }
+    Gtk::TreeIter newIter = modulesStore->append(moduleRow.children());
+    Gtk::TreeRow newRow = *newIter;
+    newRow[moduleNameColumn] = "Update";
+    newRow[rowTypeColumn] = MODULE_TYPE_ROW;
+    return Gtk::TreeRowReference(
+        modulesStore, modulesStore->get_path(newIter));
 }
 } /* namespace gdfm */

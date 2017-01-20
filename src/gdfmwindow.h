@@ -159,6 +159,20 @@ private:
     void onActionQuit();
 
     void appendModule(const Module& module);
+
+    /*
+     * Gets the row that has the children representing install actions for
+     * the given row that represents a module. Also creates the row if it
+     * doesn't exist.
+     *
+     * Returns a Gtk::TreeRow for the install section if it existed or a new
+     * row that was just created if it didn't.
+     */
+    Gtk::TreeRowReference getInstallRow(const Gtk::TreeRow& moduleRow);
+    /* Same as above getInstallRow() with uninstall. */
+    Gtk::TreeRowReference getUninstallRow(const Gtk::TreeRow& moduleRow);
+    /* Same as getInstallRow() with update. */
+    Gtk::TreeRowReference getUpdateRow(const Gtk::TreeRow& moduleRow);
 };
 } /* namespace gdfm */
 
