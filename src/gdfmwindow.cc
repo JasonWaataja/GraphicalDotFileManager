@@ -25,7 +25,9 @@
 #include <sys/stat.h>
 
 #include <err.h>
+#include <libgen.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <algorithm>
 #include <iostream>
@@ -58,6 +60,9 @@ GdfmWindow::initChildren()
 {
     builder->get_widget("add_module_button", addModuleButton);
     builder->get_widget("modules_view", modulesView);
+    builder->get_widget("install_all_button", installAllModulesButton);
+    builder->get_widget("uninstall_all_button", uninstallAllModulesButton);
+    builder->get_widget("update_all_button", updateAllModuleButton);
 }
 
 void
@@ -69,6 +74,12 @@ GdfmWindow::connectSignals()
         sigc::mem_fun(*this, &GdfmWindow::onModulesViewRowActivated));
     modulesView->signal_button_press_event().connect_notify(
         sigc::mem_fun(*this, &GdfmWindow::onModulesViewButtonPressEvent));
+    installAllModulesButton->signal_clicked().connect(
+        sigc::mem_fun(*this, &GdfmWindow::onInstallAllModulesButtonClicked));
+    uninstallAllModulesButton->signal_clicked().connect(
+        sigc::mem_fun(*this, &GdfmWindow::onUninstallAllModulesButtonClicked));
+    updateAllModuleButton->signal_clicked().connect(
+        sigc::mem_fun(*this, &GdfmWindow::onUpdateAllModulesButtonClicked));
 }
 
 void
@@ -104,9 +115,67 @@ GdfmWindow::initModulesView()
     modulesSelection->set_mode(Gtk::SELECTION_SINGLE);
 }
 
+std::vector<Module>
+GdfmWindow::createModulesFromView() const
+{
+    std::vector<Module> newModules;
+    for (const auto moduleRow : modulesStore->children())
+        newModules.push_back(createModuleForRow(moduleRow));
+    return newModules;
+}
+
+Module
+GdfmWindow::createModuleForRow(const Gtk::TreeRow& row) const
+{
+    std::shared_ptr<Module> storedModule = row[moduleColumn];
+    Module newModule;
+    newModule.setName(storedModule->getName());
+    Gtk::TreeIter childIter = row.children().begin();
+    if (childIter == row.children().end())
+        return newModule;
+    Gtk::TreeRow childRow = *childIter;
+    while (childRow[rowTypeColumn] != MODULE_TYPE_ROW) {
+        std::shared_ptr<ModuleFile> file = childRow[moduleFileColumn];
+        newModule.addFile(file->getFilename(), file->getDestinationDirectory(),
+            file->getDestinationFilename());
+        childIter++;
+        childRow = *childIter;
+        if (childIter == row.children().end())
+            return newModule;
+    }
+    /*
+     * At this point it the code, the iterator is guaranteed to be a module
+     * type row.
+     */
+    if (childRow[moduleNameColumn] == "Install") {
+        for (const auto& actionIter : childRow.children()) {
+            Gtk::TreeRow actionRow = *actionIter;
+            newModule.addInstallAction(actionRow[actionColumn]);
+        }
+        childIter++;
+        childRow = *childIter;
+    }
+    if (childRow[moduleNameColumn] == "Uninstall") {
+        for (const auto& actionIter : childRow.children()) {
+            Gtk::TreeRow actionRow = *actionIter;
+            newModule.addUninstallAction(actionRow[actionColumn]);
+        }
+        childIter++;
+        childRow = *childIter;
+    }
+    if (childRow[moduleNameColumn] == "Update") {
+        for (const auto& actionIter : childRow.children()) {
+            Gtk::TreeRow actionRow = *actionIter;
+            newModule.addUpdateAction(actionRow[actionColumn]);
+        }
+    }
+    return newModule;
+}
+
 bool
 GdfmWindow::loadFile(const std::string& path)
 {
+    std::vector<Module> modules;
     ConfigFileReader reader(path);
     bool success = reader.readModules(std::back_inserter(modules));
     if (!success) {
@@ -116,7 +185,7 @@ GdfmWindow::loadFile(const std::string& path)
         return false;
     }
     currentFilePath = path;
-    setModulesViewFromModules();
+    setModulesViewFromModules(modules);
     return true;
 }
 
@@ -137,7 +206,7 @@ GdfmWindow::loadDirectory(const std::string& path)
 }
 
 void
-GdfmWindow::setModulesViewFromModules()
+GdfmWindow::setModulesViewFromModules(const std::vector<Module>& modules)
 {
     for (const auto& module : modules) {
         appendModule(module);
@@ -266,6 +335,7 @@ GdfmWindow::onActionOpenDirectory()
 void
 GdfmWindow::onActionSave()
 {
+    std::vector<Module> modules = createModulesFromView();
     std::string outputFile = currentFilePath;
     if (outputFile.length() == 0) {
         Gtk::FileChooserDialog dialog(
@@ -300,6 +370,7 @@ GdfmWindow::onActionSave()
 void
 GdfmWindow::onActionSaveAs()
 {
+    std::vector<Module> modules = createModulesFromView();
     Gtk::FileChooserDialog dialog(
         *this, "Save As", Gtk::FILE_CHOOSER_ACTION_SAVE);
     dialog.set_select_multiple(false);
@@ -417,6 +488,15 @@ GdfmWindow::onModulesViewButtonPressEvent(GdkEventButton* button)
             addMenuItem("Add Update Action",
                 sigc::mem_fun(
                     *this, &GdfmWindow::onModuleAddUpdateActionItemActivated));
+            addMenuItem(
+                "Install", sigc::mem_fun(*this,
+                               &GdfmWindow::onModuleInstallItemActivated));
+            addMenuItem(
+                "Uninstall", sigc::mem_fun(*this,
+                                 &GdfmWindow::onModuleUninstallItemActivated));
+            addMenuItem(
+                "Update", sigc::mem_fun(*this,
+                              &GdfmWindow::onModuleUpdateItemActivated));
         } else if (type == MODULE_FILE_ROW) {
             addMenuItem(
                 "Edit", sigc::mem_fun(*this,
@@ -619,7 +699,11 @@ GdfmWindow::onModuleActionRemoveItemActivated(Gtk::TreeRowReference row)
         return;
     Gtk::TreePath path = row.get_path();
     Gtk::TreeIter iter = modulesStore->get_iter(path);
+    Gtk::TreePath parentPath = modulesStore->get_path(iter->parent());
     modulesStore->erase(iter);
+    Gtk::TreeIter parentIter = modulesStore->get_iter(parentPath);
+    if (parentIter->children().size() == 0)
+        modulesStore->erase(parentIter);
 }
 
 Gtk::TreeRowReference
@@ -704,5 +788,144 @@ GdfmWindow::getUpdateRow(const Gtk::TreeRow& moduleRow)
     newRow[rowTypeColumn] = MODULE_TYPE_ROW;
     return Gtk::TreeRowReference(
         modulesStore, modulesStore->get_path(newIter));
+}
+
+void
+GdfmWindow::onInstallAllModulesButtonClicked()
+{
+    if (!promptContinueIfNoDirectory())
+        return;
+    std::vector<Module> modules = createModulesFromView();
+    std::string sourceDirectory = getSourceDirectory();
+    for (const auto& module : modules) {
+        if (!installModuleWithPopups(module, sourceDirectory))
+            return;
+    }
+}
+
+void
+GdfmWindow::onUninstallAllModulesButtonClicked()
+{
+    if (!promptContinueIfNoDirectory())
+        return;
+    std::vector<Module> modules = createModulesFromView();
+    std::string sourceDirectory = getSourceDirectory();
+    for (const auto& module : modules) {
+        if (!uninstallModuleWithPopups(module, sourceDirectory))
+            return;
+    }
+}
+
+void
+GdfmWindow::onUpdateAllModulesButtonClicked()
+{
+    if (!promptContinueIfNoDirectory())
+        return;
+    std::vector<Module> modules = createModulesFromView();
+    std::string sourceDirectory = getSourceDirectory();
+    for (const auto& module : modules) {
+        if (!updateModuleWithPopups(module, sourceDirectory))
+            return;
+    }
+}
+
+std::string
+GdfmWindow::getSourceDirectory() const
+{
+    if (currentFilePath.length() == 0)
+        return getHomeDirectory();
+    char* filePathCopy = strdup(currentFilePath.c_str());
+    if (filePathCopy == nullptr)
+        err(EXIT_FAILURE, nullptr);
+    std::string sourceDirectory = dirname(filePathCopy);
+    free(filePathCopy);
+    return sourceDirectory;
+}
+
+bool
+GdfmWindow::promptContinueIfNoDirectory()
+{
+    if (currentFilePath.length() > 0)
+        return true;
+    Gtk::MessageDialog dialog(*this,
+        "No directory associated with the current file, use the home directory?",
+        false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true);
+    int response = dialog.run();
+    return response == Gtk::RESPONSE_YES;
+}
+
+void
+GdfmWindow::onModuleInstallItemActivated(Gtk::TreeRowReference row)
+{
+    if (!promptContinueIfNoDirectory())
+        return;
+    Gtk::TreePath path = row.get_path();
+    Gtk::TreeIter iter = modulesStore->get_iter(path);
+    Module module = createModuleForRow(*iter);
+    installModuleWithPopups(module, getSourceDirectory());
+}
+
+void
+GdfmWindow::onModuleUninstallItemActivated(Gtk::TreeRowReference row)
+{
+    if (!promptContinueIfNoDirectory())
+        return;
+    Gtk::TreePath path = row.get_path();
+    Gtk::TreeIter iter = modulesStore->get_iter(path);
+    Module module = createModuleForRow(*iter);
+    uninstallModuleWithPopups(module, getSourceDirectory());
+}
+
+void
+GdfmWindow::onModuleUpdateItemActivated(Gtk::TreeRowReference row)
+{
+    if (!promptContinueIfNoDirectory())
+        return;
+    Gtk::TreePath path = row.get_path();
+    Gtk::TreeIter iter = modulesStore->get_iter(path);
+    Module module = createModuleForRow(*iter);
+    updateModuleWithPopups(module, getSourceDirectory());
+}
+
+bool
+GdfmWindow::installModuleWithPopups(
+    const Module& module, const std::string& sourceDirectory)
+{
+    bool status = module.install(sourceDirectory);
+    if (!status) {
+        Gtk::MessageDialog dialog(*this,
+            "Failed to install module " + module.getName(), false,
+            Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
+        dialog.run();
+    }
+    return status;
+}
+
+bool
+GdfmWindow::uninstallModuleWithPopups(
+    const Module& module, const std::string& sourceDirectory)
+{
+    bool status = module.uninstall(sourceDirectory);
+    if (!status) {
+        Gtk::MessageDialog dialog(*this,
+            "Failed to uninstall module " + module.getName(), false,
+            Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
+        dialog.run();
+    }
+    return status;
+}
+
+bool
+GdfmWindow::updateModuleWithPopups(
+    const Module& module, const std::string& sourceDirectory)
+{
+    bool status = module.update(sourceDirectory);
+    if (!status) {
+        Gtk::MessageDialog dialog(*this,
+            "Failed to update module " + module.getName(), false,
+            Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
+        dialog.run();
+    }
+    return status;
 }
 } /* namespace gdfm */

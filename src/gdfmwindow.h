@@ -67,11 +67,17 @@ public:
      * currently editing it.
      */
     bool loadDirectory(const std::string& directoryPath);
-
-    void setModulesViewFromModules();
-
+    void setModulesViewFromModules(const std::vector<Module>& modules);
+    std::string getSourceDirectory() const;
+    /*
+     * If there is no current filename, then prompts the user for if it is okay
+     * to use the home directory.
+     *
+     * Returns true if there is a current filename or if there isn't and the
+     * user answers "yes" to the question.
+     */
+    bool promptContinueIfNoDirectory();
     const std::string& getCurrentFilePath() const;
-
     /*
      * Creates a dialog to add a new module. If the user accepts, then a smart
      * pointer with the module is returned.
@@ -83,7 +89,6 @@ public:
 
 private:
     std::string currentFilePath;
-    std::vector<gdfm::Module> modules;
     Glib::RefPtr<Gtk::TreeSelection> modulesSelection;
 
     Glib::RefPtr<Gtk::Builder> builder;
@@ -91,6 +96,9 @@ private:
     /* Widgets from the glade file. */
     Gtk::Button* addModuleButton;
     Gtk::TreeView* modulesView;
+    Gtk::Button* installAllModulesButton;
+    Gtk::Button* uninstallAllModulesButton;
+    Gtk::Button* updateAllModuleButton;
 
     /* Tree view related items. */
     Gtk::TreeModelColumnRecord columns;
@@ -123,12 +131,44 @@ private:
      * the menu items activate the correct actions.
      */
     void addActions();
-
     /*
      * Initializes the tree view for the modules. This includes initializing
      * modulesStore.
      */
     void initModulesView();
+
+    /*
+     * Creates a set of modules for use with saving. The point of this is that
+     * orders in the tree view can be changed and modules will be added and
+     * removed without being update in the modules variable.
+     *
+     * Returns a list of modules represented by the current state of
+     * modulesView.
+     */
+    std::vector<Module> createModulesFromView() const;
+    Module createModuleForRow(const Gtk::TreeRow& row) const;
+    /*
+     * Installs the module and creates a popup if it failed notifying the use.
+     *
+     * Returns true if the module was successfully installed, false otherwise.
+     */
+    bool installModuleWithPopups(
+        const Module& module, const std::string& sourceDirectory);
+    /*
+     * Uninstall the module and creates a popup if it failed notifying the use.
+     *
+     * Returns true if the module was successfully uninstalled, false
+     * otherwise.
+     */
+    bool uninstallModuleWithPopups(
+        const Module& module, const std::string& sourceDirectory);
+    /*
+     * Updates the module and creates a popup if it failed notifying the use.
+     *
+     * Returns true if the module was successfully updated, false otherwise.
+     */
+    bool updateModuleWithPopups(
+        const Module& module, const std::string& sourceDirectory);
 
     /* Signal handlers. */
     void onAddModuleButtonClicked();
@@ -146,10 +186,16 @@ private:
     void onModuleAddInstallActionItemActivated(Gtk::TreeRowReference row);
     void onModuleAddUninstallActionItemActivated(Gtk::TreeRowReference row);
     void onModuleAddUpdateActionItemActivated(Gtk::TreeRowReference row);
+    void onModuleInstallItemActivated(Gtk::TreeRowReference row);
+    void onModuleUninstallItemActivated(Gtk::TreeRowReference row);
+    void onModuleUpdateItemActivated(Gtk::TreeRowReference row);
     void onModuleFileEditItemActivated(Gtk::TreeRowReference row);
     void onModuleFileRemoveItemActivated(Gtk::TreeRowReference row);
     void onModuleActionEditItemActivated(Gtk::TreeRowReference row);
     void onModuleActionRemoveItemActivated(Gtk::TreeRowReference row);
+    void onInstallAllModulesButtonClicked();
+    void onUninstallAllModulesButtonClicked();
+    void onUpdateAllModulesButtonClicked();
 
     /* Actions for use with bar. */
     void onActionOpenFile();
