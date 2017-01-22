@@ -33,6 +33,7 @@
 
 #include <fstream>
 
+#include "filecheckeditor.h"
 #include "installaction.h"
 #include "util.h"
 
@@ -303,5 +304,12 @@ FileCheckAction::createConfigLines() const
     std::vector<std::string> lines;
     lines.push_back("remove " + sourcePath + " " + destinationPath);
     return lines;
+}
+
+void
+FileCheckAction::graphicalEdit(Gtk::Window& parent)
+{
+    FileCheckEditor editor(parent, this);
+    editor.run();
 }
 } /* namespace gdfm */

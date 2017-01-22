@@ -34,32 +34,30 @@ InstallActionEditor::InstallActionEditor(
 {
     assert(action != nullptr);
 
-    get_content_area()->add(filenameBox);
+    get_content_area()->add(grid);
 
     filenameLabel.set_text("Filename:");
-    filenameBox.pack_start(filenameLabel, false, false);
+    grid.attach(filenameLabel, 0, 0, 1, 1);
 
     filenameEntry.set_placeholder_text("Filename");
     filenameEntry.set_text(action->getFilename());
-    filenameBox.pack_start(filenameEntry, true, true);
-
-    get_content_area()->add(destinationBox);
+    grid.attach(filenameEntry, 1, 0, 1, 1);
 
     destinationLabel.set_text("Destination Directory:");
-    destinationBox.pack_start(destinationLabel, false, false);
+    grid.attach(destinationLabel, 0, 1, 1, 1);
 
     destinationEntry.set_placeholder_text("~");
     destinationEntry.set_text(action->getDestinationDirectory());
-    destinationBox.pack_start(destinationEntry, true, true);
-
-    get_content_area()->add(installFilenameBox);
+    grid.attach(destinationEntry, 1, 1, 1, 1);
 
     installFilenameLabel.set_text("Install Filename:");
-    installFilenameBox.pack_start(installFilenameLabel, false, false);
+    grid.attach(installFilenameLabel, 0, 2, 1, 1);
 
     installFilenameEntry.set_placeholder_text("Install Filename");
     installFilenameEntry.set_text(action->getInstallFilename());
-    installFilenameBox.pack_start(installFilenameEntry, true, true);
+    grid.attach(installFilenameEntry, 1, 2, 1, 1);
+
+    show_all_children();
 
     add_button("Ok", Gtk::RESPONSE_OK);
     add_button("Cancel", Gtk::RESPONSE_CANCEL);
@@ -71,7 +69,7 @@ InstallActionEditor::InstallActionEditor(
 void
 InstallActionEditor::onResponse(int responseId)
 {
-    if (responseId != Gtk::RESPONSE_CANCEL)
+    if (responseId != Gtk::RESPONSE_OK)
         return;
 
     std::string filename = filenameEntry.get_text();

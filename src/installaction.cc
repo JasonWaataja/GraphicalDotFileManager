@@ -27,9 +27,14 @@
 
 #include <iostream>
 
+#include "installactioneditor.h"
 #include "util.h"
 
 namespace gdfm {
+
+InstallAction::InstallAction() : ModuleAction("generic install action")
+{
+}
 
 InstallAction::InstallAction(const std::string& filename,
     const std::string& sourceDirectory,
@@ -160,5 +165,12 @@ InstallAction::createConfigLines() const
     std::vector<std::string> lines;
     lines.push_back(line);
     return lines;
+}
+
+void
+InstallAction::graphicalEdit(Gtk::Window& parent)
+{
+    InstallActionEditor editor(parent, this);
+    editor.run();
 }
 } /* namespace gdfm */

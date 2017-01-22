@@ -11,6 +11,7 @@ const char DEFAULT_REMOVE_ACTION_NAME[] = "remove action";
 
 class RemoveAction : public ModuleAction {
 public:
+    RemoveAction();
     RemoveAction(const std::string& filePath);
     RemoveAction(const std::string& filename, const std::string& directory);
     const std::string& getFilePath() const;
@@ -20,6 +21,7 @@ public:
     bool performAction() override;
 
     void updateName() override;
+    void graphicalEdit(Gtk::Window& parent) override;
     std::vector<std::string> createConfigLines() const override;
 
 private:

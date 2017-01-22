@@ -24,10 +24,13 @@
 
 #include "dependencyaction.h"
 #include "filecheckaction.h"
+#include "filecheckeditor.h"
 #include "installaction.h"
+#include "installactioneditor.h"
 #include "messageaction.h"
 #include "messageeditor.h"
 #include "removeaction.h"
+#include "removeactioneditor.h"
 #include "shellaction.h"
 #include "shelleditor.h"
 
@@ -69,6 +72,27 @@ ModuleActionEditor::onCreateActionButtonClicked()
     } else if (selected == "Shell Action") {
         std::shared_ptr<ShellAction> action(new ShellAction());
         ShellEditor editor(*this, action.get());
+        if (editor.run() == Gtk::RESPONSE_OK) {
+            this->action = action;
+            response(Gtk::RESPONSE_OK);
+        }
+    } else if (selected == "Install Action") {
+        std::shared_ptr<InstallAction> action(new InstallAction());
+        InstallActionEditor editor(*this, action.get());
+        if (editor.run() == Gtk::RESPONSE_OK) {
+            this->action = action;
+            response(Gtk::RESPONSE_OK);
+        }
+    } else if (selected == "Remove Action") {
+        std::shared_ptr<RemoveAction> action(new RemoveAction());
+        RemoveActionEditor editor(*this, action.get());
+        if (editor.run() == Gtk::RESPONSE_OK) {
+            this->action = action;
+            response(Gtk::RESPONSE_OK);
+        }
+    } else if (selected == "File Check Action") {
+        std::shared_ptr<FileCheckAction> action(new FileCheckAction());
+        FileCheckEditor editor(*this, action.get());
         if (editor.run() == Gtk::RESPONSE_OK) {
             this->action = action;
             response(Gtk::RESPONSE_OK);

@@ -42,6 +42,8 @@ set (
 	modulefileeditor.cc
 	moduleactioneditor.cc
 	installactioneditor.cc
+	filecheckeditor.cc
+	removeactioneditor.cc
 	${CMAKE_CURRENT_BINARY_DIR}/resources.c)
 
 check_include_files (wordexp.h HAVE_WORDEXP_H)

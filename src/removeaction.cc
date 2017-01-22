@@ -29,9 +29,14 @@
 
 #include <iostream>
 
+#include "removeactioneditor.h"
 #include "util.h"
 
 namespace gdfm {
+
+RemoveAction::RemoveAction() : ModuleAction(DEFAULT_REMOVE_ACTION_NAME)
+{
+}
 
 RemoveAction::RemoveAction(const std::string& filePath) : filePath(filePath)
 {
@@ -94,5 +99,12 @@ RemoveAction::createConfigLines() const
     std::vector<std::string> lines;
     lines.push_back("remove " + filePath);
     return lines;
+}
+
+void
+RemoveAction::graphicalEdit(Gtk::Window& parent)
+{
+    RemoveActionEditor editor(parent, this);
+    editor.run();
 }
 } /* namespace gdfm */

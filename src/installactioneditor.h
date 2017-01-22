@@ -37,13 +37,11 @@ public:
 private:
     InstallAction* action;
 
-    Gtk::HBox filenameBox;
+    Gtk::Grid grid;
     Gtk::Label filenameLabel;
     Gtk::Entry filenameEntry;
-    Gtk::HBox destinationBox;
     Gtk::Label destinationLabel;
     Gtk::Entry destinationEntry;
-    Gtk::HBox installFilenameBox;
     Gtk::Label installFilenameLabel;
     Gtk::Entry installFilenameEntry;
 

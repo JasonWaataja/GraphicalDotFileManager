@@ -21,27 +21,30 @@
  */
 
 
-#ifndef REMOVE_ACTION_EDITOR_H
-#define REMOVE_ACTION_EDITOR_H
+#ifndef FILE_CHECK_EDITOR_H
+#define FILE_CHECK_EDITOR_H
 
 #include <gtkmm.h>
 
-#include "removeaction.h"
+#include "filecheckaction.h"
 
 namespace gdfm {
 
-class RemoveActionEditor : public Gtk::Dialog {
+class FileCheckEditor : public Gtk::Dialog {
 public:
-    RemoveActionEditor(Gtk::Window& parent, RemoveAction* action);
+    FileCheckEditor(Gtk::Window& parent, FileCheckAction* action);
 
 private:
-    RemoveAction* action;
+    FileCheckAction* action;
 
-    Gtk::Label pathLabel;
-    Gtk::Entry pathEntry;
+    Gtk::Grid grid;
+    Gtk::Label sourcePathLabel;
+    Gtk::Entry sourcePathEntry;
+    Gtk::Label destinationPathLabel;
+    Gtk::Entry destinationPathEntry;
 
     void onResponse(int responseId);
 };
-} /* namespace 2017 */
+} /* namespace gdfm */
 
-#endif /* REMOVE_ACTION_EDITOR_H */
+#endif /* FILE_CHECK_EDITOR_H */

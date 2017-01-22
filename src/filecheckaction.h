@@ -53,6 +53,7 @@ public:
     bool shouldUpdate() const;
 
     void updateName() override;
+    void graphicalEdit(Gtk::Window& parent) override;
     std::vector<std::string> createConfigLines() const override;
 
 private:
