@@ -42,6 +42,7 @@ ModuleActionEditor::ModuleActionEditor(Gtk::Window& parent)
     typeBox.append("Remove Action");
     typeBox.append("File Check Action");
     typeBox.append("Dependency Action");
+    typeBox.set_active(0);
     get_content_area()->add(typeBox);
 
     createActionButton.set_label("Create Action");

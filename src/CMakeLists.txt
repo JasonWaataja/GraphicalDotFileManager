@@ -3,20 +3,22 @@ include (CheckIncludeFiles)
 
 find_package (PkgConfig REQUIRED)
 
-execute_process (COMMAND ${PKG_CONFIG_EXECUTABLE} --variable=glib_compile_resources gio-2.0
+execute_process (
+	COMMAND ${PKG_CONFIG_EXECUTABLE} --variable=glib_compile_resources gio-2.0
 	OUTPUT_VARIABLE GLIB_COMPILE_RESOURCES
 	OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/resources.c
+add_custom_command(
+	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/resources.c
 	DEPENDS res/gdfm.gresource.xml res/ui/mainwindow.glade
-	COMMAND ${GLIB_COMPILE_RESOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/res/gdfm.gresource.xml --target=${CMAKE_CURRENT_BINARY_DIR}/resources.c --sourcedir=${CMAKE_CURRENT_SOURCE_DIR}/res --generate-source
-	)
+	COMMAND ${GLIB_COMPILE_RESOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/res/gdfm.gresource.xml --target=${CMAKE_CURRENT_BINARY_DIR}/resources.c --sourcedir=${CMAKE_CURRENT_SOURCE_DIR}/res --generate-source)
 
 # set_source_files_properties (${CMAKE_CURRENT_BINARY_DIR}/resources.c
 # PROPERTIES GENERATED TRUE)
 
 
-set (SOURCES
+set (
+	SOURCES
 	main.cc
 	gdfmwindow.cc
 	command.cc
@@ -39,10 +41,12 @@ set (SOURCES
 	configfilewriter.cc
 	modulefileeditor.cc
 	moduleactioneditor.cc
+	installactioneditor.cc
 	${CMAKE_CURRENT_BINARY_DIR}/resources.c)
 
 check_include_files (wordexp.h HAVE_WORDEXP_H)
-configure_file (${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
+configure_file (
+	${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
 	${CMAKE_CURRENT_BINARY_DIR}/config.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
