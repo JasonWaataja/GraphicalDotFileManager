@@ -218,6 +218,7 @@ private:
     void onActionSave();
     void onActionSaveAs();
     void onActionQuit();
+    void onActionAbout();
 
     void appendModule(const Module& module);
 
