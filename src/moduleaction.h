@@ -26,6 +26,7 @@
 #include <stdarg.h>
 
 #include <string>
+#include <vector.h>
 
 #include <gtkmm.h>
 
