@@ -41,6 +41,7 @@ public:
     void setDependencies(const std::vector<std::string>& dependencies);
     /* Sets dependencies to the NULL terminated list of dependencies. */
     void setDependencies(const char* firstDependency, ...);
+    void addDependency(const std::string& dependency);
 
     bool performAction() override;
 
@@ -55,6 +56,7 @@ public:
     std::string getDependenciesAsString(const std::string& delimiter) const;
 
     void updateName() override;
+    void graphicalEdit(Gtk::Window& parent) override;
     std::vector<std::string> createConfigLines() const override;
 
 private:

@@ -28,6 +28,8 @@
 
 #include <iostream>
 
+#include "dependencyeditor.h"
+
 namespace gdfm {
 
 DependencyAction::DependencyAction() : dependencies()
@@ -164,5 +166,18 @@ DependencyAction::createConfigLines() const
     std::vector<std::string> lines;
     lines.push_back(line);
     return lines;
+}
+
+void
+DependencyAction::addDependency(const std::string& dependency)
+{
+    dependencies.push_back(dependency);
+}
+
+void
+DependencyAction::graphicalEdit(Gtk::Window& parent)
+{
+    DependencyEditor editor(parent, this);
+    editor.run();
 }
 } /* namespace gdfm */

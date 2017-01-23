@@ -23,6 +23,7 @@
 #include "moduleactioneditor.h"
 
 #include "dependencyaction.h"
+#include "dependencyeditor.h"
 #include "filecheckaction.h"
 #include "filecheckeditor.h"
 #include "installaction.h"
@@ -93,6 +94,13 @@ ModuleActionEditor::onCreateActionButtonClicked()
     } else if (selected == "File Check Action") {
         std::shared_ptr<FileCheckAction> action(new FileCheckAction());
         FileCheckEditor editor(*this, action.get());
+        if (editor.run() == Gtk::RESPONSE_OK) {
+            this->action = action;
+            response(Gtk::RESPONSE_OK);
+        }
+    } else if (selected == "Dependency Action") {
+        std::shared_ptr<DependencyAction> action(new DependencyAction);
+        DependencyEditor editor(*this, action.get());
         if (editor.run() == Gtk::RESPONSE_OK) {
             this->action = action;
             response(Gtk::RESPONSE_OK);
