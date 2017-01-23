@@ -38,8 +38,12 @@ public:
 
 private:
     MessageAction* action;
-    Gtk::Entry* nameEntry;
-    Gtk::Entry* messageEntry;
+
+    Gtk::Label messageLabel;
+    Gtk::ScrolledWindow scrolledWindow;
+    Gtk::TextView messageView;
+
+    Glib::RefPtr<Gtk::TextBuffer> messageBuffer;
 
     void onResponse(int responseId);
 };

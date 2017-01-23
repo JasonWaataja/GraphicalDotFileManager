@@ -39,13 +39,15 @@ DependencyEditor::DependencyEditor(
     /* get_content_area()->add(dependenciesLabel); */
     get_content_area()->pack_start(dependenciesLabel, false, false);
 
+    get_content_area()->pack_start(scrolledWindow);
+
     dependenciesBuffer = dependenciesView.get_buffer();
     std::ostringstream outputStream;
     for (const auto& dependency : action->getDependencies())
         outputStream << dependency << std::endl;
     dependenciesBuffer->set_text(outputStream.str());
     /* get_content_area()->add(dependenciesView); */
-    get_content_area()->pack_start(dependenciesView, true, true);
+    scrolledWindow.add(dependenciesView);
 
     show_all_children();
 

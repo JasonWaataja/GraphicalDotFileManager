@@ -36,19 +36,12 @@ public:
 
 private:
     ShellAction* action;
-    Gtk::Entry* nameEntry;
-    Gtk::TreeView* commandsView;
-    Gtk::Entry* commandEntry;
-    Gtk::Button* removeCommandButton;
 
-    Gtk::TreeModelColumnRecord columns;
-    Glib::RefPtr<Gtk::TreeSelection> commandsSelection;
-    Glib::RefPtr<Gtk::ListStore> commandsStore;
-    Gtk::TreeModelColumn<Glib::ustring> commandColumn;
+    Gtk::Label commandsLabel;
+    Gtk::ScrolledWindow scrolledWindow;
+    Gtk::TextView commandsView;
+    Glib::RefPtr<Gtk::TextBuffer> commandsBuffer;
 
-    void onCommandsSelectionChanged();
-    void onAddCommandButtonClicked();
-    void onRemoveCommandButtonClicked();
     void onResponse(int responseId);
 };
 } /* namespace gdfm */

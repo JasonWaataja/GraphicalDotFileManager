@@ -38,6 +38,7 @@ private:
     DependencyAction* action;
 
     Gtk::Label dependenciesLabel;
+    Gtk::ScrolledWindow scrolledWindow;
     Gtk::TextView dependenciesView;
     Glib::RefPtr<Gtk::TextBuffer> dependenciesBuffer;
 

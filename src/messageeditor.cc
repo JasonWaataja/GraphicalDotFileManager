@@ -31,22 +31,14 @@ MessageEditor::MessageEditor(Gtk::Window& parent, MessageAction* action)
 {
     assert(action != nullptr);
 
-    Gtk::Grid* grid = Gtk::manage(new Gtk::Grid());
-    get_content_area()->add(*grid);
-    Gtk::Label* nameLabel = Gtk::manage(new Gtk::Label());
-    nameLabel->set_text("Name:");
-    grid->attach(*nameLabel, 0, 0, 1, 1);
-    nameEntry = Gtk::manage(new Gtk::Entry());
-    nameEntry->set_placeholder_text("Name");
-    nameEntry->set_text(action->getName());
-    grid->attach(*nameEntry, 1, 0, 1, 1);
-    Gtk::Label* messageLabel = Gtk::manage(new Gtk::Label());
-    messageLabel->set_text("Message:");
-    grid->attach(*messageLabel, 0, 1, 1, 1);
-    messageEntry = Gtk::manage(new Gtk::Entry());
-    messageEntry->set_placeholder_text("Message");
-    messageEntry->set_text(action->getMessage());
-    grid->attach(*messageEntry, 1, 1, 1, 1);
+    messageLabel.set_text("Message:");
+    get_content_area()->pack_start(messageLabel, false, false);
+
+    get_content_area()->pack_start(scrolledWindow, true, true);
+
+    messageBuffer = messageView.get_buffer();
+    messageBuffer->set_text(action->getMessage());
+    scrolledWindow.add(messageView);
 
     show_all_children();
 
@@ -62,11 +54,8 @@ MessageEditor::onResponse(int responseId)
 {
     if (responseId != Gtk::RESPONSE_OK)
         return;
-    std::string name = nameEntry->get_text();
-    std::string message = messageEntry->get_text();
-    if (name.length() == 0 || message.length() == 0)
-        return;
-    action->setName(name);
-    action->setMessage(message);
+    std::string message = messageBuffer->get_text();
+    if (message.length() > 0)
+        action->setMessage(message);
 }
 } /* namespace gdfm */
