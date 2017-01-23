@@ -89,7 +89,6 @@ public:
 
 private:
     std::string currentFilePath;
-    Glib::RefPtr<Gtk::TreeSelection> modulesSelection;
 
     Glib::RefPtr<Gtk::Builder> builder;
 
@@ -99,6 +98,8 @@ private:
     Gtk::Button* installAllModulesButton;
     Gtk::Button* uninstallAllModulesButton;
     Gtk::Button* updateAllModuleButton;
+    Gtk::Button* moveUpButton;
+    Gtk::Button* moveDownButton;
 
     /* Tree view related items. */
     Gtk::TreeModelColumnRecord columns;
@@ -110,6 +111,7 @@ private:
     Gtk::TreeModelColumn<std::shared_ptr<ModuleFile>> moduleFileColumn;
     Gtk::TreeModelColumn<std::shared_ptr<ModuleAction>> actionColumn;
     Glib::RefPtr<Gtk::TreeStore> modulesStore;
+    Glib::RefPtr<Gtk::TreeSelection> modulesSelection;
 
     /*
      * This method must be called before accessing any of the widgets specified
@@ -169,14 +171,30 @@ private:
      */
     bool updateModuleWithPopups(
         const Module& module, const std::string& sourceDirectory);
+    /*
+     * Show the correct buttons in the action area on the right of the view
+     * based on the current selection. This needs to be called whenever the
+     * selection is changed to keep it in sync.
+     *
+     * Shows moveUpButton and moveDownButton if there is no action selected,
+     * hides them otherwise.
+     */
+    void updateVisibleButtons();
 
     /* Signal handlers. */
     void onAddModuleButtonClicked();
     void onModulesViewRowActivated(
         const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
     void onModulesViewButtonPressEvent(GdkEventButton* button);
+    void onInstallAllModulesButtonClicked();
+    void onUninstallAllModulesButtonClicked();
+    void onUpdateAllModulesButtonClicked();
+    void onMoveUpButtonClicked();
+    void onMoveDownButtonClicked();
+    void onModulesSelectionChanged();
     /*
-     * These signal handlers are specifically for the popup menu that can be
+     * These signal handlers are specifically for the popup menu that can
+     * be
      * created on the tree view.
      */
     void onAddModuleItemActivated();
@@ -193,9 +211,6 @@ private:
     void onModuleFileRemoveItemActivated(Gtk::TreeRowReference row);
     void onModuleActionEditItemActivated(Gtk::TreeRowReference row);
     void onModuleActionRemoveItemActivated(Gtk::TreeRowReference row);
-    void onInstallAllModulesButtonClicked();
-    void onUninstallAllModulesButtonClicked();
-    void onUpdateAllModulesButtonClicked();
 
     /* Actions for use with bar. */
     void onActionOpenFile();

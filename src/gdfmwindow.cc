@@ -49,6 +49,7 @@ GdfmWindow::GdfmWindow(
     addActions();
     initModulesView();
     connectSignals();
+    updateVisibleButtons();
 }
 
 GdfmWindow::~GdfmWindow()
@@ -63,6 +64,8 @@ GdfmWindow::initChildren()
     builder->get_widget("install_all_button", installAllModulesButton);
     builder->get_widget("uninstall_all_button", uninstallAllModulesButton);
     builder->get_widget("update_all_button", updateAllModuleButton);
+    builder->get_widget("move_up_button", moveUpButton);
+    builder->get_widget("move_down_button", moveDownButton);
 }
 
 void
@@ -80,6 +83,12 @@ GdfmWindow::connectSignals()
         sigc::mem_fun(*this, &GdfmWindow::onUninstallAllModulesButtonClicked));
     updateAllModuleButton->signal_clicked().connect(
         sigc::mem_fun(*this, &GdfmWindow::onUpdateAllModulesButtonClicked));
+    moveUpButton->signal_clicked().connect(
+        sigc::mem_fun(*this, &GdfmWindow::onMoveUpButtonClicked));
+    moveDownButton->signal_clicked().connect(
+        sigc::mem_fun(*this, &GdfmWindow::onMoveDownButtonClicked));
+    modulesSelection->signal_changed().connect(
+        sigc::mem_fun(*this, &GdfmWindow::onModulesSelectionChanged));
 }
 
 void
@@ -927,5 +936,67 @@ GdfmWindow::updateModuleWithPopups(
         dialog.run();
     }
     return status;
+}
+
+void
+GdfmWindow::onModulesSelectionChanged()
+{
+    updateVisibleButtons();
+}
+
+void
+GdfmWindow::updateVisibleButtons()
+{
+    Gtk::TreeIter selectedIter = modulesSelection->get_selected();
+    bool visibility = true;
+    if (!modulesStore->iter_is_valid(selectedIter))
+        visibility = false;
+    else {
+        Gtk::TreeRow selectedRow = *selectedIter;
+        visibility = selectedRow[rowTypeColumn] == MODULE_ACTION_ROW;
+    }
+    moveUpButton->set_visible(visibility);
+    moveDownButton->set_visible(visibility);
+}
+
+void
+GdfmWindow::onMoveUpButtonClicked()
+{
+    Gtk::TreeIter selectedIter = modulesSelection->get_selected();
+    if (!modulesStore->iter_is_valid(selectedIter))
+        return;
+    Gtk::TreeRow selectedRow = *selectedIter;
+    if (selectedRow[rowTypeColumn] != MODULE_ACTION_ROW)
+        return;
+    Gtk::TreePath startPath = modulesStore->get_path(selectedIter);
+    Gtk::TreePath endPath = startPath;
+    if (!endPath.prev())
+        return;
+    modulesStore->move(
+        modulesStore->get_iter(startPath), modulesStore->get_iter(endPath));
+}
+
+void
+GdfmWindow::onMoveDownButtonClicked()
+{
+    Gtk::TreeIter selectedIter = modulesSelection->get_selected();
+    if (!modulesStore->iter_is_valid(selectedIter))
+        return;
+    Gtk::TreeRow selectedRow = *selectedIter;
+    if (selectedRow[rowTypeColumn] != MODULE_ACTION_ROW)
+        return;
+    Gtk::TreePath startPath = modulesStore->get_path(selectedIter);
+    Gtk::TreePath endPath = startPath;
+    endPath.next();
+    Gtk::TreeIter endIter = modulesStore->get_iter(endPath);
+    if (!modulesStore->iter_is_valid(endIter))
+        return;
+    /*
+     * I wanted to use a move function here, and I have before when using GTK+.
+     * However, the C api has a move_after function which I used for move
+     * functions like these but I don't think gtkmm has it. Since it's only
+     * moving one row, though, a swap works.
+     */
+    modulesStore->iter_swap(modulesStore->get_iter(startPath), endIter);
 }
 } /* namespace gdfm */
