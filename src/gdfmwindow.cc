@@ -102,6 +102,8 @@ GdfmWindow::addActions()
     this->add_action(
         "save-as", sigc::mem_fun(*this, &GdfmWindow::onActionSaveAs));
     this->add_action("quit", sigc::mem_fun(*this, &GdfmWindow::onActionQuit));
+    this->add_action(
+        "about", sigc::mem_fun(*this, &GdfmWindow::onActionAbout));
 }
 
 void
@@ -411,6 +413,23 @@ void
 GdfmWindow::onActionQuit()
 {
     close();
+}
+
+void
+GdfmWindow::onActionAbout()
+{
+    Gtk::AboutDialog dialog;
+    dialog.set_parent(*this);
+    dialog.set_program_name("GraphicalDotFileManager");
+    dialog.set_version("Version 0.1.2");
+    dialog.set_copyright("Copyright 2017 Jason Waataja");
+    dialog.set_license_type(Gtk::LICENSE_MIT_X11);
+    dialog.set_website(
+        "http://github.com/JasonWaataja/GraphicalDotFileManager");
+    dialog.set_website_label("website");
+    dialog.set_authors(std::vector<Glib::ustring>{
+        "Jason Waataja <jasonswaataja@gmail.com>" });
+    dialog.run();
 }
 
 void
