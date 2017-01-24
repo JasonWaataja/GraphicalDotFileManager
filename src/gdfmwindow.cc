@@ -421,7 +421,7 @@ GdfmWindow::onActionAbout()
     Gtk::AboutDialog dialog;
     dialog.set_parent(*this);
     dialog.set_program_name("GraphicalDotFileManager");
-    dialog.set_version("Version 0.1.2");
+    dialog.set_version("Version 0.1.3");
     dialog.set_copyright("Copyright 2017 Jason Waataja");
     dialog.set_license_type(Gtk::LICENSE_MIT_X11);
     dialog.set_website(
