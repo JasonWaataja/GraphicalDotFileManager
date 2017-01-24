@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=0.1.3
+Type=Application
+Name=GraphicalDotFileManager
+Exec=gdfm
+Comment=A graphical interface to DotFileManager
+Terminal=false
+Categories=Utility;GTK;
