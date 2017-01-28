@@ -20,7 +20,6 @@
  * IN THE SOFTWARE.
  */
 
-
 #ifndef SHELL_EDITOR_H
 #define SHELL_EDITOR_H
 

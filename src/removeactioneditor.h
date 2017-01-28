@@ -20,7 +20,6 @@
  * IN THE SOFTWARE.
  */
 
-
 #ifndef REMOVE_ACTION_EDITOR_H
 #define REMOVE_ACTION_EDITOR_H
 
