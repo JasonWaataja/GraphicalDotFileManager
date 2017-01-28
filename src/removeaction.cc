@@ -81,7 +81,7 @@ RemoveAction::performAction()
         std::cout << std::endl;
     }
     verboseMessage("Removing %s.\n\n", filePath.c_str());
-    return deleteFile(filePath);
+    return deleteFile(shellExpandPath(filePath));
 }
 
 void

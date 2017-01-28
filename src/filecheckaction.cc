@@ -149,7 +149,8 @@ FileCheckAction::shouldUpdate() const
         warnx("Missing file to check for updates.");
         return false;
     }
-    return shouldUpdateFile(sourcePath, destinationPath);
+    return shouldUpdateFile(
+        shellExpandPath(sourcePath), shellExpandPath(destinationPath));
 }
 
 bool
@@ -255,10 +256,11 @@ FileCheckAction::performAction()
      * requires that the argument to be non-const on my system. Making a
      * non-const copy allows for more portability, I guess.
      */
-    char* sourcePath = strdup(this->sourcePath.c_str());
+    char* sourcePath = strdup(shellExpandPath(this->sourcePath).c_str());
     if (sourcePath == NULL)
         err(EXIT_FAILURE, NULL);
-    char* destinationPath = strdup(this->destinationPath.c_str());
+    char* destinationPath =
+        strdup(shellExpandPath(this->destinationPath).c_str());
     /*
      * I'm not sure if I still should free sourcePath since it's a fatal error.
      * */

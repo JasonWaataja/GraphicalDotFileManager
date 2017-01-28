@@ -52,17 +52,16 @@ Module::install(const std::string& sourceDirectory) const
     for (const auto& file : files) {
         std::shared_ptr<InstallAction> installAction =
             file.createInstallAction(sourceDirectory);
-        if (installAction->performAction()) {
-            warnx("Failed to perform action \"%s\".",
+        if (!installAction->performAction()) {
+            warnx("Failed to perform install action \"%s\".",
                 installAction->getName().c_str());
             return false;
         }
     }
     for (const auto& action : installActions) {
-        bool status = action->performAction();
-        if (!status) {
-            warnx(
-                "Failed to perform action \"%s\".", action->getName().c_str());
+        if (action->performAction()) {
+            warnx("Failed to perform install action \"%s\".",
+                action->getName().c_str());
             return false;
         }
     }
@@ -75,17 +74,16 @@ Module::uninstall(const std::string& sourceDirectory) const
     for (const auto& file : files) {
         std::shared_ptr<RemoveAction> uninstallAction =
             file.createUninstallAction();
-        if (uninstallAction->performAction()) {
-            warnx("Failed to perform action \"%s\".",
+        if (!uninstallAction->performAction()) {
+            warnx("Failed to uninstall perform action \"%s\".",
                 uninstallAction->getName().c_str());
             return false;
         }
     }
     for (const auto& action : uninstallActions) {
-        bool status = action->performAction();
-        if (!status) {
-            warnx(
-                "Failed to perform action \"%s\".", action->getName().c_str());
+        if (action->performAction()) {
+            warnx("Failed to perform uninstall action \"%s\".",
+                action->getName().c_str());
             return false;
         }
     }
@@ -100,16 +98,15 @@ Module::update(const std::string& sourceDirectory) const
         std::shared_ptr<FileCheckAction> updateAction =
             file.createUpdateAction(sourceDirectory);
         if (!updateAction->performAction()) {
-            warnx("Failed to perform action \"%s\".",
+            warnx("Failed to perform update action \"%s\".",
                 updateAction->getName().c_str());
             return false;
         }
     }
     for (const auto& action : updateActions) {
-        bool status = action->performAction();
-        if (!status) {
-            warnx(
-                "Failed to perform action \"%s\".", action->getName().c_str());
+        if (action->performAction()) {
+            warnx("Failed to perform update action \"%s\".",
+                action->getName().c_str());
             return false;
         }
     }
