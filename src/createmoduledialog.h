@@ -20,7 +20,6 @@
  * IN THE SOFTWARE.
  */
 
-
 #ifndef CREATE_MODULE_DIALOG_H
 #define CREATE_MODULE_DIALOG_H
 

@@ -20,7 +20,6 @@
  * IN THE SOFTWARE.
  */
 
-
 #ifndef DEPENDENCY_ACTION_H
 #define DEPENDENCY_ACTION_H
 

@@ -20,7 +20,6 @@
  * IN THE SOFTWARE.
  */
 
-
 #ifndef MODULE_FILE_EDITOR_H
 #define MODULE_FILE_EDITOR_H
 

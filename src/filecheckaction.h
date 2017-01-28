@@ -20,7 +20,6 @@
  * IN THE SOFTWARE.
  */
 
-
 #ifndef FILE_CHECK_H
 #define FILE_CHECK_H
 

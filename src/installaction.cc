@@ -122,8 +122,8 @@ InstallAction::setInstallFilename(const std::string& installFilename)
 bool
 InstallAction::performAction()
 {
-    std::string sourcePath = getFilePath();
-    std::string destinationPath = getInstallationPath();
+    std::string sourcePath = shellExpandPath(getFilePath());
+    std::string destinationPath = shellExpandPath(getInstallationPath());
 
     if (isInteractive()) {
         std::string prompt =

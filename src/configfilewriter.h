@@ -20,7 +20,6 @@
  * IN THE SOFTWARE.
  */
 
-
 #ifndef CONFIG_FILE_WRITER_H
 #define CONFIG_FILE_WRITER_H
 

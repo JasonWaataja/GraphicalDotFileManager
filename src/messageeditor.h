@@ -20,7 +20,6 @@
  * IN THE SOFTWARE.
  */
 
-
 #ifndef MESSAGE_EDITOR_H
 #define MESSAGE_EDITOR_H
 

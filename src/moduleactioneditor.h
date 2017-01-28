@@ -20,7 +20,6 @@
  * IN THE SOFTWARE.
  */
 
-
 #ifndef MODULE_ACTION_EDITOR_H
 #define MODULE_ACTION_EDITOR_H
 

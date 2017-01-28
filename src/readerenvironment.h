@@ -20,7 +20,6 @@
  * IN THE SOFTWARE.
  */
 
-
 #ifndef READER_ENVIRONMENT_H
 #define READER_ENVIRONMENT_H
 
