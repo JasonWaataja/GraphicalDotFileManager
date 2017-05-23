@@ -102,7 +102,7 @@ DependencyAction::performAction()
 
         /*
          * Print a dollar sign and a space to simulate being in a shell. I'm
-         * not sure of anything better to do here, maybe add color come day.
+         * not sure of anything better to do here, maybe add color some day.
          */
         std::cout << std::endl;
         std::cout << "$ ";
