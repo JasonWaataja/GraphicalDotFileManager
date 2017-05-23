@@ -59,7 +59,7 @@ Module::install(const std::string& sourceDirectory) const
         }
     }
     for (const auto& action : installActions) {
-        if (action->performAction()) {
+        if (!action->performAction()) {
             warnx("Failed to perform install action \"%s\".",
                 action->getName().c_str());
             return false;
@@ -81,7 +81,7 @@ Module::uninstall(const std::string& sourceDirectory) const
         }
     }
     for (const auto& action : uninstallActions) {
-        if (action->performAction()) {
+        if (!action->performAction()) {
             warnx("Failed to perform uninstall action \"%s\".",
                 action->getName().c_str());
             return false;
@@ -104,7 +104,7 @@ Module::update(const std::string& sourceDirectory) const
         }
     }
     for (const auto& action : updateActions) {
-        if (action->performAction()) {
+        if (!action->performAction()) {
             warnx("Failed to perform update action \"%s\".",
                 action->getName().c_str());
             return false;
@@ -175,6 +175,24 @@ const std::vector<ModuleFile>
 Module::getFiles() const
 {
     return files;
+}
+
+Gtk::Window*
+Module::getParent() const
+{
+    return parent;
+}
+
+void
+Module::setParent(Gtk::Window* parent)
+{
+    this->parent = parent;
+    for (auto& module : installActions)
+        module->setParent(parent);
+    for (auto& module : uninstallActions)
+        module->setParent(parent);
+    for (auto& module : updateActions)
+        module->setParent(parent);
 }
 
 std::vector<std::string>

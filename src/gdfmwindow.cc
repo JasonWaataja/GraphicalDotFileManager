@@ -195,6 +195,8 @@ GdfmWindow::loadFile(const std::string& path)
         dialog.run();
         return false;
     }
+    for (auto &module : modules)
+        module.setParent(this);
     currentFilePath = path;
     setModulesViewFromModules(modules);
     return true;
@@ -421,7 +423,7 @@ GdfmWindow::onActionAbout()
     Gtk::AboutDialog dialog;
     dialog.set_parent(*this);
     dialog.set_program_name("GraphicalDotFileManager");
-    dialog.set_version("Version 0.1.4");
+    dialog.set_version("Version 0.1.5");
     dialog.set_copyright("Copyright 2017 Jason Waataja");
     dialog.set_license_type(Gtk::LICENSE_MIT_X11);
     dialog.set_website(

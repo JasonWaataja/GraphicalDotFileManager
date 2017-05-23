@@ -102,6 +102,18 @@ ModuleAction::graphicalEdit(Gtk::Window& parent)
 {
 }
 
+Gtk::Window*
+ModuleAction::getParent() const
+{
+    return parent;
+}
+
+void
+ModuleAction::setParent(Gtk::Window* parent)
+{
+    this->parent = parent;
+}
+
 std::vector<std::string>
 ModuleAction::createConfigLines() const
 {

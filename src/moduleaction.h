@@ -58,6 +58,8 @@ public:
      * This method should create a popup with several fields for editing.
      */
     virtual void graphicalEdit(Gtk::Window& parent);
+    Gtk::Window* getParent() const;
+    void setParent(Gtk::Window* parent);
     /*
      * Creates a list of lines that would create the given command when used in
      * a dfm config file.
@@ -78,6 +80,7 @@ private:
     std::string name;
     bool verbose = false;
     bool interactive = false;
+    Gtk::Window* parent = nullptr;
 };
 } /* namespace gdfm */
 
