@@ -1,6 +1,15 @@
 # Change Log
 This project adheres to Semantic Versioning
 
+## [0.1.5] - 2017-05-22
+### Added
+- Add dialog messages for messages instead of just printing them to the
+  terminal.
+
+### Fixed
+- Incorporate some fixes from DFM into this release. This includes actulally
+  working correctly, being able to install files correctly, etc.
+
 ## [0.1.4] - 2017-01-28
 ### Fixed
 - Fix bug where it doesn't work. Incorporating changes from DotFileManager for
