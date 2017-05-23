@@ -195,6 +195,8 @@ GdfmWindow::loadFile(const std::string& path)
         dialog.run();
         return false;
     }
+    for (auto &module : modules)
+        module.setParent(this);
     currentFilePath = path;
     setModulesViewFromModules(modules);
     return true;

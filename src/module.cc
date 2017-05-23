@@ -177,6 +177,24 @@ Module::getFiles() const
     return files;
 }
 
+Gtk::Window*
+Module::getParent() const
+{
+    return parent;
+}
+
+void
+Module::setParent(Gtk::Window* parent)
+{
+    this->parent = parent;
+    for (auto& module : installActions)
+        module->setParent(parent);
+    for (auto& module : uninstallActions)
+        module->setParent(parent);
+    for (auto& module : updateActions)
+        module->setParent(parent);
+}
+
 std::vector<std::string>
 Module::createConfigLines() const
 {

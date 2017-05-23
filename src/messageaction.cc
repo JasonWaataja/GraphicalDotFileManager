@@ -41,7 +41,11 @@ MessageAction::MessageAction(const std::string& message) : message(message)
 bool
 MessageAction::performAction()
 {
-    std::cout << message << std::endl;
+    if (!getParent())
+        return false;
+    Gtk::MessageDialog dialog(*getParent(), message, false, Gtk::MESSAGE_INFO,
+        Gtk::BUTTONS_OK, true);
+    dialog.run();
     return true;
 }
 
